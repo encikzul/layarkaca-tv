@@ -129,6 +129,28 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private TextView btnWifi;
     private TextView shamsiDate;
     private boolean shamsi;
+    /** Today's prayer times under the clock (prayer_zone), and whether the azan plays. */
+    private TextView prayerLine;
+    private String prayerZone = "";
+    private boolean prayerAzan;
+    private android.widget.TextClock malayDate;
+    private final java.util.concurrent.atomic.AtomicBoolean prayerRefreshing = new java.util.concurrent.atomic.AtomicBoolean();
+    /** The weather card and MET warning strip (weather_location); see Weather. */
+    private View infoBlock, cardsRow, weatherCard, prayerCard, hazeCard;
+    private TextView prLabel, prAzan, prNext, prIn, prNextLabel, prImsak, hzValue, hzBand, hzNote, hzSource;
+    private String ramadanStart = "";
+    private final TextView[] prCells = new TextView[5];
+    private HazeBar hzBar;
+    private android.graphics.drawable.GradientDrawable stripMet, stripHaze;
+    private boolean metAlertShown;
+    private String hazeStation = "";
+    private final java.util.concurrent.atomic.AtomicBoolean hazeRefreshing = new java.util.concurrent.atomic.AtomicBoolean();
+    private TextView warnStrip, wxLabel, wxTemp, wxSummary, wxSource;
+    private final TextView[] wxPeriods = new TextView[3];
+    private android.widget.ImageView wxIcon;
+    private String weatherLocation = "", weatherPlace = "";
+    private boolean infoOn;
+    private final java.util.concurrent.atomic.AtomicBoolean weatherRefreshing = new java.util.concurrent.atomic.AtomicBoolean();
     private String vpnApp;
     private SpringAnimation springX, springY;
     private float glassTargetX, glassTargetY;
@@ -231,6 +253,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         @Override
         public void run() {
             updateShamsiDate();
+            showPrayerLine();
+            updateWeather();
+            if (infoOn && Weather.due(MainActivity.this)) refreshWeather();
+            updatePrayerCard();
+            updateHaze();
+            if (infoOn && Haze.due(MainActivity.this)) refreshHaze();
             updateWifiLabel();
             refreshPlacesIfDue();
             handler.postDelayed(this, MINUTE_MS);
@@ -293,6 +321,72 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (!cfg.showNetworkPill) btnWifi.setVisibility(View.GONE);
         shamsiDate = findViewById(R.id.shamsiDate);
         shamsi = cfg.shamsiDate;
+        prayerLine = findViewById(R.id.prayerLine);
+        prayerZone = cfg.prayerZone;
+        prayerAzan = cfg.azan;
+        if (!prayerZone.isEmpty()) prayerLine.setVisibility(View.VISIBLE);
+        if (!prayerZone.isEmpty() && !shamsi) {
+            // The Hijri date goes on a small line under the date, which is written in Malay.
+            ViewGroup block = (ViewGroup) shamsiDate.getParent();
+            block.removeView(shamsiDate);
+            block.addView(shamsiDate);
+            shamsiDate.setTextSize(11f);
+            shamsiDate.setTextColor(0xB8F4F6F5);
+            shamsiDate.setPadding(0, (int) (3 * density), 0, 0);
+            TextView dateLineView = findViewById(R.id.date);
+            dateLineView.setTextSize(10f);   // AM/PM, the date and the Hijri line stack beside the digits
+            shamsiDate.setVisibility(View.VISIBLE);
+            malayDate = findViewById(R.id.date);
+        }
+        infoBlock = findViewById(R.id.infoBlock);
+        cardsRow = findViewById(R.id.cardsRow);
+        weatherCard = findViewById(R.id.weatherCard);
+        warnStrip = findViewById(R.id.warnStrip);
+        wxLabel = findViewById(R.id.wxLabel);
+        wxTemp = findViewById(R.id.wxTemp);
+        wxSummary = findViewById(R.id.wxSummary);
+        wxPeriods[0] = findViewById(R.id.wxP0);
+        wxPeriods[1] = findViewById(R.id.wxP1);
+        wxPeriods[2] = findViewById(R.id.wxP2);
+        wxSource = findViewById(R.id.wxSource);
+        wxIcon = findViewById(R.id.wxIcon);
+        weatherLocation = cfg.weatherLocation;
+        weatherPlace = cfg.weatherPlace.isEmpty() ? cfg.weatherLocation : cfg.weatherPlace;
+        prayerCard = findViewById(R.id.prayerCard);
+        hazeCard = findViewById(R.id.hazeCard);
+        prLabel = findViewById(R.id.prLabel);
+        prAzan = findViewById(R.id.prAzan);
+        prNext = findViewById(R.id.prNext);
+        prIn = findViewById(R.id.prIn);
+        prNextLabel = findViewById(R.id.prNextLabel);
+        prImsak = findViewById(R.id.prImsak);
+        ramadanStart = cfg.ramadanStart;
+        int[] cellIds = {R.id.pr0, R.id.pr1, R.id.pr2, R.id.pr3, R.id.pr4};
+        for (int i = 0; i < 5; i++) prCells[i] = findViewById(cellIds[i]);
+        hzValue = findViewById(R.id.hzValue);
+        hzBand = findViewById(R.id.hzBand);
+        hzNote = findViewById(R.id.hzNote);
+        hzSource = findViewById(R.id.hzSource);
+        hzBar = findViewById(R.id.hzBar);
+        hazeStation = cfg.hazeStation;
+        infoOn = !weatherLocation.isEmpty() || !hazeStation.isEmpty();
+        if (infoOn) {
+            infoBlock.setVisibility(View.VISIBLE);
+            weatherCard.setBackground(new GlassDrawable(weatherCard, 16 * density, density, null, 0.5f));
+            prayerCard.setBackground(new GlassDrawable(prayerCard, 16 * density, density, null, 0.5f));
+            hazeCard.setBackground(new GlassDrawable(hazeCard, 16 * density, density, null, 0.5f));
+            // The prayer card replaces the line under the clock.
+            if (!prayerZone.isEmpty()) prayerLine.setVisibility(View.GONE);
+            stripMet = new android.graphics.drawable.GradientDrawable();
+            stripMet.setCornerRadius(16 * density);
+            stripMet.setColor(0x2EF2994A);
+            stripMet.setStroke(Math.max(1, Math.round(1.5f * density)), 0xFFF2994A);
+            stripHaze = new android.graphics.drawable.GradientDrawable();
+            stripHaze.setCornerRadius(16 * density);
+            stripHaze.setColor(0x29F2C94C);
+            stripHaze.setStroke(Math.max(1, Math.round(1.5f * density)), 0xFFF2C94C);
+            warnStrip.setBackground(stripMet);
+        }
         if (shamsi) {
             shamsiDate.setVisibility(View.VISIBLE);
             TextView date = findViewById(R.id.date);
@@ -669,6 +763,20 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         resuming = true;
         reloadApps(true);
         updateShamsiDate();
+        AzanService.stop(this);   // Home stops an azan that is playing
+        // Preview the prayer-time panel: touch azan-test in the theme folder and press Home.
+        java.io.File azanTest = Config.dir(this) != null ? new java.io.File(Config.dir(this), "azan-test") : null;
+        if (azanTest != null && azanTest.delete() && !prayerZone.isEmpty()) {
+            long[] nextUp = Prayer.next(this, prayerZone, System.currentTimeMillis());
+            AzanActivity.open(this, nextUp != null ? (int) nextUp[0] : 2, System.currentTimeMillis());
+        }
+        showPrayerLine();
+        refreshPrayer();
+        updateWeather();
+        refreshWeather();
+        updatePrayerCard();
+        updateHaze();
+        refreshHaze();
         updateWifiLabel();
         updateInputsButton();
         startWallpaperRotation();
@@ -877,11 +985,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // The place the picture is of, when there is one; the app's own name is the fallback for
         // the user's own wallpapers, which carry no title.
         final String label = placeName != null ? placeName : adapter.labelAt(position);
-        final String desc = placeName != null ? placeText : "";
+        final String desc = placeName != null && !infoOn ? placeText : "";   // cards take the description's room
         final String where = placeName != null ? placeCountry : "";
         int color = adapter.ambientColorAt(position);
-        heroBottom = dockTopInRoot - HERO_GAP_DP * density;
+        heroBottom = dockTopInRoot - (infoOn ? 22f : HERO_GAP_DP) * density;
         float y = heroBottom - heroShelf.getHeight();
+        layoutInfo(y);
         boolean changed = !label.contentEquals(heroName.getText());
 
         if (reducedMotion) {
@@ -985,7 +1094,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     /** The shelf's two lines. An empty description takes no room, so the title keeps its place. */
     private void setHeroText(String title, String where, String desc) {
-        heroName.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, titleSizeSp(title));
+        heroName.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, infoOn ? 15f : titleSizeSp(title));
         heroName.setText(title);
         heroWhere.setText(where);
         heroWhere.setVisibility(where.isEmpty() ? View.GONE : View.VISIBLE);
@@ -1041,8 +1150,20 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      * Follows the rotation: the shelf names whichever place is on screen. Called after the picture
      * changes, so the words and the picture never disagree.
      */
+    /**
+     * A theme's own picture named "03 Gunung Kinabalu - Sabah.jpg" is captioned "Gunung Kinabalu",
+     * "SABAH" (a leading number only sets the order); a name without " - " gives no caption.
+     */
+    private static String[] captionFromName(File picture) {
+        if (picture == null) return null;
+        String n = picture.getName().replaceFirst("\\.[A-Za-z0-9]+$", "").replaceFirst("^\\d+[ _-]+", "").replace('_', ' ');
+        int dash = n.indexOf(" - ");
+        if (dash <= 0) return null;
+        return new String[]{n.substring(0, dash).trim(), "", n.substring(dash + 3).trim()};
+    }
+
     private void setPlace(File picture) {
-        String[] about = placesMode ? PlaceWallpapers.describe(picture) : null;
+        String[] about = placesMode ? PlaceWallpapers.describe(picture) : captionFromName(picture);
         String title = about != null ? titleCase(about[0]) : null;
         String overview = about != null ? about[1] : "";
         String country = about != null && about.length > 2 ? about[2] : "";
@@ -1221,6 +1342,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     }
 
     private void hideShelf() {
+        hideInfo();
         if (!heroShown) return;
         heroShown = false;
         heroShelf.animate().alpha(0f).setDuration(reducedMotion ? 100 : 160).start();
@@ -1460,6 +1582,335 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     private void updateShamsiDate() {
         if (shamsi) shamsiDate.setText(Shamsi.today());
+    }
+
+    // ---- weather card and warnings ---------------------------------------------------------------
+
+    /** Puts the cards under the top bar, as tall as the room above the place shelf allows, and shows them. */
+    private void layoutInfo(float shelfTop) {
+        if (!infoOn) return;
+        View left = findViewById(R.id.leftBlock);
+        int[] at = new int[2], rootAt = new int[2];
+        left.getLocationInWindow(at);
+        findViewById(R.id.root).getLocationInWindow(rootAt);
+        float top = at[1] - rootAt[1] + left.getHeight() + 10 * density;
+        infoBlock.setY(top);
+        // With a warning strip up, the place's name gives way so the cards keep their full height.
+        boolean stripOn = warnStrip.getVisibility() == View.VISIBLE;
+        heroName.setAlpha(stripOn ? 0f : 1f);
+        heroWhere.setAlpha(stripOn ? 0f : 1f);
+        float strip = stripOn ? 38 * density : 0f;
+        float limit = stripOn && heroBottom > 0 ? heroBottom : shelfTop;
+        int h = (int) Math.min(185 * density, limit - top - 8 * density - strip);
+        boolean fits = h >= 90 * density;
+        ViewGroup.LayoutParams lp = cardsRow.getLayoutParams();
+        if (fits && lp.height != h) {
+            lp.height = h;
+            cardsRow.setLayoutParams(lp);
+        }
+        cardsRow.setVisibility(fits ? View.VISIBLE : View.GONE);
+        infoBlock.animate().alpha(1f).setDuration(reducedMotion ? 100 : 220).start();
+    }
+
+    private void hideInfo() {
+        if (infoOn) infoBlock.animate().alpha(0f).setDuration(reducedMotion ? 100 : 160).start();
+    }
+
+    private void updateWeather() {
+        if (weatherLocation.isEmpty()) return;
+        Weather.Today t = Weather.today(this);
+        if (t == null) {
+            weatherCard.setVisibility(View.INVISIBLE);
+        } else {
+            weatherCard.setVisibility(View.VISIBLE);
+            wxLabel.setText(("Cuaca · " + weatherPlace).toUpperCase(Locale.ROOT));
+            String high = t.max + "°", low = " / " + t.min + "°";
+            android.text.SpannableString temp = new android.text.SpannableString(high + low);
+            temp.setSpan(new android.text.style.RelativeSizeSpan(0.45f), high.length(), temp.length(), 0);
+            temp.setSpan(new android.text.style.ForegroundColorSpan(0xB3F4F6F5), high.length(), temp.length(), 0);
+            wxTemp.setText(temp);
+            wxIcon.setImageResource(weatherIcon(t.summary));
+            String when = t.when.isEmpty() || t.when.equalsIgnoreCase("tiada") ? "" : ", " + t.when.toLowerCase(Locale.ROOT);
+            wxSummary.setText(t.summary + when);
+            String[] names = {"Pagi", "Petang", "Malam"}, values = {t.morning, t.afternoon, t.night};
+            for (int i = 0; i < 3; i++) {
+                android.text.SpannableString p = new android.text.SpannableString(names[i] + "\n" + shortWeather(values[i]));
+                p.setSpan(new android.text.style.ForegroundColorSpan(0xB8F4F6F5), 0, names[i].length(), 0);
+                p.setSpan(new android.text.style.RelativeSizeSpan(0.9f), 0, names[i].length(), 0);
+                wxPeriods[i].setText(p);
+            }
+            wxSource.setText("Ramalan MET Malaysia · " + weatherLocation);
+        }
+        Weather.Alert alert = Weather.active(this, Weather.places(weatherLocation, weatherPlace));
+        boolean wasShown = warnStrip.getVisibility() == View.VISIBLE;
+        metAlertShown = alert != null;
+        if (alert == null) {
+            showHazeStrip();
+        } else {
+            warnStrip.setBackground(stripMet);
+            String title = alert.title.equals(alert.title.toUpperCase(Locale.ROOT)) && alert.title.length() > 1
+                    ? alert.title.charAt(0) + alert.title.substring(1).toLowerCase(Locale.ROOT) : alert.title;
+            String head = title + " di " + weatherPlace;
+            String until = alert.validTo > 0 ? "   ·   hingga " + new java.text.SimpleDateFormat(
+                    android.text.format.DateFormat.is24HourFormat(this) ? "H:mm" : "h:mm a", Locale.ROOT)
+                    .format(new java.util.Date(alert.validTo)) : "";
+            android.text.SpannableString s = new android.text.SpannableString(head + until);
+            s.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, head.length(), 0);
+            warnStrip.setText(s);
+            warnStrip.setVisibility(View.VISIBLE);
+        }
+        if (wasShown != (warnStrip.getVisibility() == View.VISIBLE) && heroShown) layoutInfo(heroShelf.getY());
+    }
+
+    private static int weatherIcon(String summary) {
+        String s = summary.toLowerCase(Locale.ROOT);
+        if (s.contains("ribut")) return R.drawable.ic_wx_storm;
+        if (s.contains("tiada hujan") || s.contains("cerah")) return R.drawable.ic_wx_sun;
+        if (s.contains("hujan")) return R.drawable.ic_wx_rain;
+        return R.drawable.ic_wx_cloud;
+    }
+
+    /** "Ribut petir di beberapa tempat" becomes "Ribut petir" for the one-line outlook. */
+    private static String shortWeather(String s) {
+        String out = s.replace(" di beberapa tempat", "").replace(" di kebanyakan tempat", "")
+                .replace(" di satu dua tempat", "").trim();
+        return out.isEmpty() ? "-" : out;
+    }
+
+    /** The prayer card: the next prayer large, how long until it, and today's five times. */
+    /** The day of Ramadan today (1 to 30), or -1: from ramadan_start when set, else JAKIM's Hijri month. */
+    private int ramadanDay() {
+        if (prayerZone.isEmpty()) return -1;
+        java.util.Calendar today = java.util.Calendar.getInstance();
+        int[] h = Prayer.hijriParts(this, prayerZone, today);
+        if (ramadanStart.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            java.util.Calendar start = java.util.Calendar.getInstance();
+            start.set(Integer.parseInt(ramadanStart.substring(0, 4)), Integer.parseInt(ramadanStart.substring(5, 7)) - 1,
+                    Integer.parseInt(ramadanStart.substring(8, 10)), 0, 0, 0);
+            java.util.Calendar midnight = (java.util.Calendar) today.clone();
+            midnight.set(java.util.Calendar.HOUR_OF_DAY, 0);
+            midnight.set(java.util.Calendar.MINUTE, 0);
+            midnight.set(java.util.Calendar.SECOND, 0);
+            long days = Math.round((midnight.getTimeInMillis() - start.getTimeInMillis()) / 86_400_000.0);
+            if (days < 0 || days >= 30) return -1;
+            if (days >= 28 && h != null && h[1] == 10) return -1;   // Syawal came after 29 days
+            return (int) days + 1;
+        }
+        return h != null && h[1] == 9 ? h[2] : -1;
+    }
+
+    /** The prayer card: the next prayer large, how long until it, and today's times; in Ramadan, Imsak and berbuka. */
+    private void updatePrayerCard() {
+        if (!infoOn || prayerZone.isEmpty()) return;
+        long now = System.currentTimeMillis();
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        long[] today = Prayer.times(this, prayerZone, cal);
+        long[] next = Prayer.next(this, prayerZone, now);
+        if (today == null || next == null) {
+            prayerCard.setVisibility(View.INVISIBLE);
+            return;
+        }
+        prayerCard.setVisibility(View.VISIBLE);
+        boolean h24 = android.text.format.DateFormat.is24HourFormat(this);
+        java.text.SimpleDateFormat full = new java.text.SimpleDateFormat(h24 ? "H:mm" : "h:mm a", Locale.ROOT);
+        java.text.SimpleDateFormat shortFmt = new java.text.SimpleDateFormat(h24 ? "H:mm" : "h:mm", Locale.ROOT);
+        // Named by place, not by zone code: the times are JAKIM's for the whole zone this place is in.
+        String where = weatherPlace.isEmpty() ? "Zon " + prayerZone
+                : weatherLocation.isEmpty() || weatherLocation.equalsIgnoreCase(weatherPlace) ? weatherPlace
+                : weatherPlace + ", " + weatherLocation;
+        int ramadan = ramadanDay();
+        long imsak = ramadan > 0 ? Prayer.imsak(this, prayerZone, cal) : -1;
+        String label;
+        long target;
+        int highlight = -1;   // 0-4 a prayer cell, 5 the Imsak cell
+        if (ramadan > 0 && imsak > 0) {
+            prLabel.setText(("Ramadan · hari ke-" + ramadan + " daripada 30").toUpperCase(Locale.ROOT));
+            prAzan.setText(where);
+            if (now >= imsak && now < today[3]) {
+                label = "Berbuka puasa";
+                target = today[3];
+                highlight = 3;
+            } else if (now < imsak) {
+                label = "Imsak";
+                target = imsak;
+                highlight = 5;
+            } else {
+                java.util.Calendar tomorrow = (java.util.Calendar) cal.clone();
+                tomorrow.add(java.util.Calendar.DAY_OF_MONTH, 1);
+                long t = Prayer.imsak(this, prayerZone, tomorrow);
+                label = "Imsak esok";
+                target = t > 0 ? t : next[1];
+            }
+            prNextLabel.setText(label);
+            prNext.setText(full.format(new java.util.Date(target)));
+            prImsak.setVisibility(View.VISIBLE);
+        } else {
+            prLabel.setText(("Waktu solat · " + where).toUpperCase(Locale.ROOT));
+            prAzan.setText(!prayerAzan ? "" : AzanActivity.mutedToday(this) ? "Disenyapkan hari ini"
+                    : Prayer.azanFile(this, 0) != null ? "Azan hidup" : "Bunyi peringatan hidup");
+            prNextLabel.setText("Seterusnya");
+            target = next[1];
+            prNext.setText(Prayer.NAMES[(int) next[0]] + " " + full.format(new java.util.Date(target)));
+            for (int p = 0; p < 5; p++) if (today[p] == next[1]) highlight = p;
+            prImsak.setVisibility(View.GONE);
+        }
+        long mins = Math.max(0, (target - now + 59_999L) / 60_000L);
+        String span = mins >= 60 ? (mins / 60) + " jam " + (mins % 60) + " minit" : mins + " minit";
+        prIn.setText((ramadan > 0 ? "lagi " : "dalam ") + span);
+        for (int p = 0; p < 6; p++) {
+            TextView cell = p < 5 ? prCells[p] : prImsak;
+            long at = p < 5 ? today[p] : imsak;
+            if (p == 5 && imsak <= 0) continue;
+            String name = p < 5 ? Prayer.NAMES[p] : "Imsak", time = shortFmt.format(new java.util.Date(at));
+            android.text.SpannableString s = new android.text.SpannableString(name + "\n" + time);
+            s.setSpan(new android.text.style.RelativeSizeSpan(0.62f), 0, name.length(), 0);
+            s.setSpan(new android.text.style.ForegroundColorSpan(p == highlight ? 0xFFF4B740 : 0xCCF4F6F5), 0, name.length(), 0);
+            cell.setText(s);
+            cell.setAlpha(at <= now ? 0.5f : 1f);
+            if (p == highlight) {
+                android.graphics.drawable.GradientDrawable box = new android.graphics.drawable.GradientDrawable();
+                box.setCornerRadius(8 * density);
+                box.setColor(0x1FF4B740);
+                box.setStroke(Math.max(1, Math.round(1.2f * density)), 0xFFF4B740);
+                cell.setBackground(box);
+            } else {
+                cell.setBackground(null);
+            }
+        }
+    }
+
+    /** The air quality card, and the yellow strip when the air is unhealthy and no MET warning is up. */
+    private void updateHaze() {
+        if (!infoOn || hazeStation.isEmpty()) return;
+        Haze.Reading r = Haze.reading(this, hazeStation);
+        if (r == null) {
+            hazeCard.setVisibility(View.INVISIBLE);
+            return;
+        }
+        hazeCard.setVisibility(View.VISIBLE);
+        if (r.api < 0) {
+            hzValue.setText("–");
+            hzBand.setText("Tiada bacaan");
+            hzBand.setTextColor(0xFFF4F6F5);
+            android.graphics.drawable.GradientDrawable none = new android.graphics.drawable.GradientDrawable();
+            none.setCornerRadius(20 * density);
+            none.setColor(0x33FFFFFF);
+            hzBand.setBackground(none);
+            hzNote.setText("Bacaan jam ini belum tersedia.");
+            hzSource.setText("JAS APIMS · " + (r.station.contains(",") ? r.station.substring(0, r.station.indexOf(',')) : r.station));
+            return;
+        }
+        int band = Haze.band(r.api);
+        hzValue.setText(String.valueOf(r.api));
+        hzBand.setText(Haze.BANDS[band]);
+        hzBand.setTextColor(band == 4 ? 0xFFFFFFFF : 0xFF0B0F12);
+        android.graphics.drawable.GradientDrawable chip = new android.graphics.drawable.GradientDrawable();
+        chip.setCornerRadius(20 * density);
+        chip.setColor(Haze.COLORS[band]);
+        hzBand.setBackground(chip);
+        hzBar.setValue(r.api);
+        String[] notes = {"Udara bersih.", "Tiada jerebu. Selamat untuk aktiviti luar.", "Kurangkan aktiviti luar.",
+                "Elakkan aktiviti luar. Tutup tingkap.", "Kekal di dalam rumah."};
+        hzNote.setText(notes[band]);
+        String when = "";
+        if (r.wallTime > 0) {
+            java.text.SimpleDateFormat f = new java.text.SimpleDateFormat(
+                    android.text.format.DateFormat.is24HourFormat(this) ? "H:mm" : "h:mm a", Locale.ROOT);
+            f.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));   // APIMS stores Malaysian time as UTC
+            when = " · " + f.format(new java.util.Date(r.wallTime));
+        }
+        String station = r.station.contains(",") ? r.station.substring(0, r.station.indexOf(',')) : r.station;
+        hzSource.setText("JAS APIMS · " + station + (r.nearest ? " · terdekat" : "") + when);
+        if (!metAlertShown) {
+            boolean wasShown = warnStrip.getVisibility() == View.VISIBLE;
+            showHazeStrip();
+            if (wasShown != (warnStrip.getVisibility() == View.VISIBLE) && heroShown) layoutInfo(heroShelf.getY());
+        }
+    }
+
+    /** The yellow strip for unhealthy air (IPU above 100), shown only when there is no MET warning. */
+    private void showHazeStrip() {
+        Haze.Reading r = hazeStation.isEmpty() ? null : Haze.reading(this, hazeStation);
+        int band = r != null ? Haze.band(r.api) : 0;
+        if (band < 2) {
+            warnStrip.setVisibility(View.GONE);
+            return;
+        }
+        String head = "Amaran jerebu";
+        String rest = "   ·   IPU " + weatherPlace + " " + r.api + ", " + Haze.BANDS[band] + "   ·   Tutup tingkap, kurangkan aktiviti luar";
+        android.text.SpannableString s = new android.text.SpannableString(head + rest);
+        s.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, head.length(), 0);
+        warnStrip.setText(s);
+        warnStrip.setBackground(stripHaze);
+        warnStrip.setVisibility(View.VISIBLE);
+    }
+
+    private void refreshHaze() {
+        if (hazeStation.isEmpty() || !hazeRefreshing.compareAndSet(false, true)) return;
+        final Context app = getApplicationContext();
+        new Thread(() -> {
+            try {
+                Haze.refresh(app);
+            } finally {
+                hazeRefreshing.set(false);
+            }
+            handler.post(this::updateHaze);
+        }, "haze").start();
+    }
+
+    /** Fetches the forecast and warnings when stale; off the main thread. */
+    private void refreshWeather() {
+        if (weatherLocation.isEmpty() || !weatherRefreshing.compareAndSet(false, true)) return;
+        final Context app = getApplicationContext();
+        final String location = weatherLocation;
+        new Thread(() -> {
+            try {
+                Weather.refresh(app, location);
+            } finally {
+                weatherRefreshing.set(false);
+            }
+            handler.post(this::updateWeather);
+        }, "weather").start();
+    }
+
+    private void showPrayerLine() {
+        if (prayerZone.isEmpty()) return;
+        if (malayDate != null) {
+            java.util.Calendar now = java.util.Calendar.getInstance();
+            String d = new java.text.SimpleDateFormat("EEEE, d MMMM yyyy", new Locale("ms", "MY")).format(now.getTime());
+            String fmt = "'" + d.replace("'", "") + "'";
+            malayDate.setFormat12Hour(fmt);
+            malayDate.setFormat24Hour(fmt);
+            String hijri = Prayer.hijri(this, prayerZone, now);
+            int ramadan = ramadanDay();
+            if (ramadan > 0) hijri = ramadan + " Ramadan" + (hijri != null ? hijri.substring(hijri.lastIndexOf(' ')) : "");
+            shamsiDate.setText(hijri != null ? hijri : "");
+            shamsiDate.setTextColor(ramadan > 0 ? 0xFFF4B740 : 0xB8F4F6F5);
+        }
+        CharSequence line = Prayer.line(this, prayerZone);
+        prayerLine.setText(line != null ? line : "");
+        if (line == null) refreshPrayer();   // a new month, or not fetched yet
+    }
+
+    /** Fetches the month's times when missing (once per month) and sets the next azan; off the main thread. */
+    private void refreshPrayer() {
+        if (prayerZone.isEmpty() || !prayerRefreshing.compareAndSet(false, true)) return;
+        final Context app = getApplicationContext();
+        final String zone = prayerZone;
+        final boolean azan = prayerAzan;
+        new Thread(() -> {
+            try {
+                Prayer.ensure(app, zone);
+                Prayer.schedule(app, zone, azan, System.currentTimeMillis());
+            } finally {
+                prayerRefreshing.set(false);
+            }
+            handler.post(() -> {
+                CharSequence line = Prayer.line(app, zone);
+                if (line != null) prayerLine.setText(line);
+                updatePrayerCard();
+            });
+        }, "prayer").start();
     }
 
     /** Shows the Wi-Fi network name on the button when we can read it, otherwise the connection type. */

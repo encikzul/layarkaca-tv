@@ -15,6 +15,7 @@ powershell -ExecutionPolicy Bypass -File tools\theme.ps1 -TvHost 192.168.1.50 th
 | `default/` | The built-in look written out as JSON, as a starting point for your own |
 | `aurora/` | A dark aurora wallpaper (teal and violet on navy, darker at the bottom) with a matching background colour |
 | `six-columns/` | Six smaller tiles per row and one grid row visible under the dock |
+| `malaysia/` | Malaysia: prayer times (JAKIM zone), MET weather and warnings, the air pollutant index (APIMS), five tiles per row. Set for Kuala Lumpur; change the four place keys for yours, see [README-MY.md](../README-MY.md) |
 
 ## Keys
 
@@ -43,6 +44,13 @@ is ignored, and a file that doesn't parse is ignored as a whole, so a theme can 
 | `wallpaper_minutes` | 0 to 1440 | Minutes between pictures when the theme has a `wallpapers/` folder; 0 changes only when Home starts. Default 30 |
 | `cache_clean_days` | 0 to 90 | Days between clearing the TV's app caches, which the TV does itself (default 15); `0` turns it off. See [docs/cache-clean.md](../docs/cache-clean.md) |
 | `places` | bool | Pictures of places to visit (Bing's daily images, no key), renewed weekly with last week's deleted, each named with its country and a few lines about it; pictures with people in them are skipped. On by default, and they replace the theme's own pictures. `false`: the theme's own pictures, and the launcher never goes online |
+| `prayer_zone` | JAKIM zone code, e.g. `SGR01` | Malaysian prayer times (api.waktusolat.app, JAKIM data): a prayer card with the next prayer and today's times, a reminder at each prayer while the TV is on, and Ramadan mode. Empty: none of it. Zones: [README-MY.md](../README-MY.md#zon-waktu-solat) |
+| `azan` | bool | The reminder at each prayer time: a panel over whatever is on screen and beeps, or the theme's `azan.mp3` (`azan_subuh.mp3` for Subuh) when present. On by default once `prayer_zone` is set |
+| `beep_seconds` | 1 to 60 | How long the reminder beeps. Default 7 |
+| `ramadan_start` | `YYYY-MM-DD` | First day of Ramadan as announced; overrides JAKIM's calculated Hijri date, which can be a day off |
+| `weather_location` | MET location name, e.g. `Petaling` | Today's forecast card and MET warnings (data.gov.my, MET Malaysia) for that district |
+| `weather_place` | string | The name shown on the cards and also looked for in warnings, e.g. a town in that district |
+| `haze_station` | APIMS station name, e.g. `Shah Alam` | The air pollutant index card and a haze strip above 100 (eqms.doe.gov.my; an unofficial feed, the card hides if it changes) |
 
 ## Wallpapers
 

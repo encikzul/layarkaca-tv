@@ -10,8 +10,22 @@ android {
         applicationId 'com.gathin.tvhome'
         minSdk 26
         targetSdk 34
-        versionCode 4
-        versionName '2.3'
+        versionCode 5
+        versionName '2.3-my.1'
+    }
+
+    signingConfigs {
+        // Published releases (.github/workflows/release.yml) are signed with the project's own key, handed in
+        // through the environment; a local build keeps the debug key, as before.
+        release {
+            def keystore = System.getenv('RELEASE_KEYSTORE')
+            if (keystore) {
+                storeFile file(keystore)
+                storePassword System.getenv('RELEASE_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('RELEASE_KEY_ALIAS')
+                keyPassword System.getenv('RELEASE_KEY_PASSWORD')
+            }
+        }
     }
 
     buildTypes {
@@ -20,8 +34,8 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            // Sideloaded over ADB, never published: sign with the debug key so it installs over a debug build.
-            signingConfig signingConfigs.debug
+            // Built yourself: the debug key, so it installs over a debug build. A published release: its own key.
+            signingConfig System.getenv('RELEASE_KEYSTORE') ? signingConfigs.release : signingConfigs.debug
         }
     }
 

@@ -12,3 +12,8 @@ backup/
 # App banners for the webOS simulator preview only: other companies' logos, kept out of the repository.
 webos/samples/
 *.ipk
+
+# signing keys for published releases stay off git
+*.jks
+*.jks.b64
+*.keystore

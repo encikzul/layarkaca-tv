@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
 # Build the launcher APK and install it on the TV as the default home screen.
 set -euo pipefail
+# APK=<file> installs a ready-built APK (from the Releases page) instead of building one, with the same
+# checks and rollback. The path is relative to where you run this. For phones (Termux), which cannot build.
+if [ -n "${APK:-}" ]; then
+  APK="$(cd "$(dirname "$APK")" && pwd)/$(basename "$APK")"
+  [ -f "$APK" ] || { echo "ERROR: no APK at $APK" >&2; exit 1; }
+  SKIP_BUILD=1
+fi
 cd "$(dirname "$0")"
 : "${TV_HOST:?set TV_HOST to the TV IP address, e.g. TV_HOST=192.168.1.50 $0}"
+if [ -z "${SKIP_BUILD:-}" ]; then
 # macOS: java_home or Homebrew; Linux: the java on PATH.
 export JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 17 2>/dev/null || { [ -d /opt/homebrew/opt/openjdk@17 ] && echo /opt/homebrew/opt/openjdk@17; } || java -XshowSettings:properties -version 2>&1 | awk '/java.home/ {print $3}')}"
 # Android Studio's default SDK location on macOS, then on Linux, then Homebrew's command-line tools.
@@ -11,6 +19,7 @@ export ANDROID_HOME="${ANDROID_HOME:-/opt/homebrew/share/android-commandlinetool
 export PATH="$JAVA_HOME/bin:$PATH"
 [ -f local.properties ] || echo "sdk.dir=$ANDROID_HOME" > local.properties
 ./gradlew assembleRelease -q --console=plain
+fi
 TOOLS="$(cd ../tools && pwd)"   # absolute, so the venv's Python doesn't warn about "../" in its prefix
 PY=$TOOLS/venv/bin/python
 [ -x "$PY" ] || PY=$TOOLS/venv/Scripts/python.exe
@@ -74,7 +83,7 @@ fi
 echo "Stock launcher: $STOCK_LAUNCHER"
 if [ "$STOCK_LAUNCHER" = none ]; then DISABLE_STOCK="echo stock launcher left alone"
 else DISABLE_STOCK="pm disable-user --user 0 $STOCK_LAUNCHER"; fi
-APK=app/build/outputs/apk/release/app-release.apk
+APK="${APK:-app/build/outputs/apk/release/app-release.apk}"
 
 # The safeguard. From the install on, any failure (a check below, or a dropped connection that stops the
 # script) puts the TV back as it was: Glass TV removed, the original launcher enabled and made Home again.

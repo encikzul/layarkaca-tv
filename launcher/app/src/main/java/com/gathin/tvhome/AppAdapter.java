@@ -210,6 +210,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
             String pkg = ri.activityInfo.packageName;
             if (pkg.equals(ctx.getPackageName()) || hidden.contains(pkg)) continue;
             ComponentName component = new ComponentName(pkg, ri.activityInfo.name);
+            // hidden_apps may also name one entry of an app ("pkg/.Activity"), e.g. an app's splash duplicate.
+            if (hidden.contains(component.flattenToShortString()) || hidden.contains(component.flattenToString())) continue;
             Cards.Card card = cardByPkg.get(pkg);
             if (card != null && !card.component.equals(component)) continue;   // the card stands in for this tile
             String key = component.flattenToShortString() + '@' + ri.activityInfo.applicationInfo.sourceDir;

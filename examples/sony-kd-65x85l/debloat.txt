@@ -1,0 +1,46 @@
+# Sony BRAVIA KD-65X85L (device BRAVIA_VH22, MediaTek), Malaysia firmware
+# Google TV 12 (API 31), build BRAVIA_VH22_M_PA-user 12 STT2.230505.001.S136 682241
+#
+# Apply:   TV_HOST=<tv ip> tools/disable.sh examples/sony-kd-65x85l/debloat.txt
+# Undo:    TV_HOST=<tv ip> tools/restore.sh examples/sony-kd-65x85l/debloat.txt com.google.android.apps.tv.launcherx
+# Everything is DISABLED, not uninstalled. Comment out any line you want to keep.
+#
+# Same firmware build as examples/sony-bravia-4k-vh2 (KD-X80J, VH2 platform); this list is that one trimmed
+# to what this TV has. Applied in two batches with Home, HDMI, remote, Wi-Fi, voice search and casting
+# checked after each, then the launcher installed. Port 5555 opened with USB debugging alone, no pairing.
+# Stock launcher: com.google.android.apps.tv.launcherx. Live TV / inputs: com.sony.dtv.tvx and the
+# com.sony.dtv.tvinput.* services: keep them, with braviasync*, tvapi, sonysystemservice and all com.mediatek.*.
+# Kept by owner's choice: Chromecast (mediashell), voice search (katniss, voicesearch, assistantadapter),
+# firmware updates, YouTube Music (already disabled at the factory on this set).
+# Already disabled at the factory: com.apple.atve.sony.appletv, com.sony.dtv.b2b.vendorprotocol,
+# com.sony.dtv.b2b.softap, com.sony.dtv.kenhchonloc, com.google.android.youtube.tvmusic.
+# Also claim HOME here: com.astro.sott (Astro) and sideloaded apps such as prayer-time launchers; leave them if
+# you use them, the install script makes Glass TV the default either way.
+
+# ACR viewing tracker
+tv.samba.ssm                                   # Samba TV fingerprints what's on screen
+tv.samba.ssm.ui
+
+# telemetry and remote support
+com.qterics.da.product
+com.sony.dtv.da.service
+com.sonyericsson.idd.agent
+com.sony.dtv.sonybugreportsys
+com.google.android.feedback
+
+# demo / shop mode
+com.sony.dtv.demosupport
+com.sony.dtv.demosystemsupport
+com.sony.dtv.multiscreendemo
+
+# preloaded apps
+com.sony.dtv.customersupport                   # Help tile
+com.sony.dtv.smarthelp
+com.google.android.play.games
+
+# Sony promos / content rows
+com.sony.dtv.promos
+com.sony.dtv.sonyselect
+
+# Google TV setup wizard: claims HOME once the stock launcher is off
+com.google.android.tungsten.setupwraith

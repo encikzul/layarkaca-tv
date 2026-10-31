@@ -52,6 +52,7 @@ TV on one, add a line to its `debloat.txt` and it moves to section 1.
 | Sony BRAVIA 9 II (K-65XR90M2, BRAVIA_AE3, MediaTek MT5838) | Google TV 14 | [`sony-bravia-9-ii`](../examples/sony-bravia-9-ii/) |
 | Sony BRAVIA BF1 (BRAVIA 2 II class, BRAVIA_BF1_4K_A, MediaTek) | Google TV 12 | [`sony-bravia-bf1`](../examples/sony-bravia-bf1/) |
 | Sony BRAVIA KD-65X80J (2021, BRAVIA_VH2, MediaTek), India | Google TV 10 | [`sony-kd-65x80j`](../examples/sony-kd-65x80j/) |
+| Sony BRAVIA KD-65X85L (BRAVIA_VH22, MediaTek), Malaysia | Google TV 12 | [`sony-kd-65x85l`](../examples/sony-kd-65x85l/) |
 | Sony BRAVIA XBR-65X900E (2017, BRAVIA_ATV2) | Android TV 9 | [`sony-xbr-x900e`](../examples/sony-xbr-x900e/) |
 | Stellamore T950S projector (Droidlogic be30a3, Amlogic txhd2) | Android 13 | [`stellamore-t950s`](../examples/stellamore-t950s/) |
 | TCL 40S5400A (C06, C06_2K_GB, MediaTek MT9221, 1 GB) | Android TV 11 | [`tcl-40s5400a`](../examples/tcl-40s5400a/) |

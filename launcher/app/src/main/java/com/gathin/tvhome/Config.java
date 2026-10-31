@@ -66,6 +66,20 @@ final class Config {
     final int cacheCleanDays;
     /** Whether the overlay file was present and parsed. */
     final boolean overlayApplied;
+    /** JAKIM zone for prayer times (prayer_zone, e.g. SGR01); empty shows none. See Prayer. */
+    String prayerZone = "";
+    /** Play the theme's azan.mp3 at each prayer time (azan); on by default once a zone is set. */
+    boolean azan;
+    /** MET Malaysia forecast location for the weather card (weather_location, e.g. "Petaling"); empty: none. */
+    String weatherLocation = "";
+    /** The name shown on the card and also matched in warnings (weather_place, e.g. "Shah Alam"). */
+    String weatherPlace = "";
+    /** APIMS station for the air quality card (haze_station, e.g. "Shah Alam"); empty: no card. */
+    String hazeStation = "";
+    /** First day of Ramadan as announced (ramadan_start, "YYYY-MM-DD"); empty follows JAKIM's Hijri date. */
+    String ramadanStart = "";
+    /** How long the reminder beeps at a prayer time (beep_seconds, 1 to 60). */
+    int beepSeconds = 7;
 
     private Config(List<String> dockApps, List<String> hiddenApps, String liveTvPackage, String liveTvAction,
                    String sourcePanelService, String sourcePanelAction, String inputAction,
@@ -171,10 +185,21 @@ final class Config {
         int cacheCleanDays = json != null ? integer(json, "cache_clean_days", CacheCleaner.DEFAULT_DAYS, 0, 90)
                 : CacheCleaner.DEFAULT_DAYS;
 
-        return new Config(dock, hidden, liveTv, liveTvAction, panelService, panelAction, inputAction,
+        Config cfg = new Config(dock, hidden, liveTv, liveTvAction, panelService, panelAction, inputAction,
                 Math.max(1, columns), Math.max(0, rowsBelow), shamsi, moduleCards, reducedMotion,
                 vpn, homeSettings, networkPill, liveTvRow, background, wallpaper, wallpapers, wallpaperIntervalMs,
                 places, cacheCleanDays, applied);
+        String zone = json != null ? string(json, "prayer_zone", "").toUpperCase(java.util.Locale.ROOT) : "";
+        cfg.prayerZone = zone.matches("[A-Z]{3}\\d{2}") ? zone : "";
+        cfg.azan = !cfg.prayerZone.isEmpty() && bool(json, "azan", true);
+        if (json != null) {
+            cfg.weatherLocation = string(json, "weather_location", "");
+            cfg.weatherPlace = string(json, "weather_place", "");
+            cfg.hazeStation = string(json, "haze_station", "");
+            cfg.ramadanStart = string(json, "ramadan_start", "");
+            cfg.beepSeconds = integer(json, "beep_seconds", 7, 1, 60);
+        }
+        return cfg;
     }
 
     /** Reads and parses the overlay; any problem means "no overlay", never a crash on the home screen. */

@@ -69,6 +69,521 @@
             android:visibility="gone" />
     </LinearLayout>
 
+    <!-- MET warning strip and the weather card (weather_location), between the top bar and the place
+         shelf. Placed and sized in code, shown and hidden with the shelf; see Weather. -->
+    <LinearLayout
+        android:id="@+id/infoBlock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="56dp"
+        android:paddingEnd="56dp"
+        android:alpha="0"
+        android:visibility="gone"
+        android:importantForAccessibility="no">
+
+        <TextView
+            android:id="@+id/warnStrip"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_vertical"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:drawableStart="@drawable/ic_wx_alert"
+            android:drawablePadding="8dp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:textColor="#FFF4F6F5"
+            android:textSize="11sp"
+            android:fontFamily="@font/outfit"
+            android:fontVariationSettings="'wght' 400"
+            android:includeFontPadding="false"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/cardsRow"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:orientation="horizontal">
+
+            <!-- Prayer card (prayer_zone); see Prayer. -->
+            <LinearLayout
+                android:id="@+id/prayerCard"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1.55"
+                
+                android:orientation="vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="14dp"
+                android:paddingBottom="12dp"
+                android:visibility="invisible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                    android:id="@+id/prLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="#B8F4F6F5"
+                    android:textSize="9sp"
+                    android:fontFamily="@font/outfit"
+                    android:fontVariationSettings="'wght' 500"
+                    android:layout_weight="1"
+                    android:letterSpacing="0.14"
+                    android:singleLine="true" />
+                    <TextView
+                    android:id="@+id/prAzan"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="#B8F4F6F5"
+                    android:textSize="9sp"
+                    android:fontFamily="@font/outfit"
+                    android:fontVariationSettings="'wght' 400"
+                    android:singleLine="true" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/prNextLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="#B8F4F6F5"
+                    android:textSize="11sp"
+                    android:fontFamily="@font/outfit"
+                    android:fontVariationSettings="'wght' 400"
+                    android:layout_marginTop="8dp"
+                    android:text="Seterusnya" />
+                <TextView
+                    android:id="@+id/prNext"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="#FFF4B740"
+                    android:textSize="32sp"
+                    android:fontFamily="@font/outfit"
+                    android:fontVariationSettings="'wght' 500"
+                    android:layout_marginTop="4dp"
+                    android:singleLine="true"
+                    android:letterSpacing="-0.02" />
+                <TextView
+                    android:id="@+id/prIn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="#D9F4F6F5"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/outfit"
+                    android:fontVariationSettings="'wght' 400"
+                    android:layout_marginTop="5dp"
+                    android:singleLine="true" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/prImsak"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="6dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:includeFontPadding="false"
+                        android:lineSpacingExtra="3dp"
+                        android:maxLines="2"
+                        android:textColor="#FFF4F6F5"
+                        android:textSize="13sp"
+                        android:fontFamily="@font/outfit"
+                        android:fontVariationSettings="'wght' 400"
+                        android:visibility="gone" />
+                    <TextView
+                        android:id="@+id/pr0"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        
+                        android:paddingStart="8dp"
+                        android:paddingEnd="6dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:includeFontPadding="false"
+                        android:lineSpacingExtra="3dp"
+                        android:singleLine="false"
+                        android:maxLines="2"
+                        android:textColor="#FFF4F6F5"
+                        android:textSize="13sp"
+                        android:fontFamily="@font/outfit"
+                        android:fontVariationSettings="'wght' 400" />
+                    <TextView
+                        android:id="@+id/pr1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="6dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:includeFontPadding="false"
+                        android:lineSpacingExtra="3dp"
+                        android:singleLine="false"
+                        android:maxLines="2"
+                        android:textColor="#FFF4F6F5"
+                        android:textSize="13sp"
+                        android:fontFamily="@font/outfit"
+                        android:fontVariationSettings="'wght' 400" />
+                    <TextView
+                        android:id="@+id/pr2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="6dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:includeFontPadding="false"
+                        android:lineSpacingExtra="3dp"
+                        android:singleLine="false"
+                        android:maxLines="2"
+                        android:textColor="#FFF4F6F5"
+                        android:textSize="13sp"
+                        android:fontFamily="@font/outfit"
+                        android:fontVariationSettings="'wght' 400" />
+                    <TextView
+                        android:id="@+id/pr3"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="6dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:includeFontPadding="false"
+                        android:lineSpacingExtra="3dp"
+                        android:singleLine="false"
+                        android:maxLines="2"
+                        android:textColor="#FFF4F6F5"
+                        android:textSize="13sp"
+                        android:fontFamily="@font/outfit"
+                        android:fontVariationSettings="'wght' 400" />
+                    <TextView
+                        android:id="@+id/pr4"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="6dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:includeFontPadding="false"
+                        android:lineSpacingExtra="3dp"
+                        android:singleLine="false"
+                        android:maxLines="2"
+                        android:textColor="#FFF4F6F5"
+                        android:textSize="13sp"
+                        android:fontFamily="@font/outfit"
+                        android:fontVariationSettings="'wght' 400" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/weatherCard"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="14dp"
+                android:paddingBottom="12dp"
+                android:visibility="invisible">
+
+                <TextView
+                    android:id="@+id/wxLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:includeFontPadding="false"
+                    android:textColor="#B8F4F6F5"
+                    android:textSize="9sp"
+                    android:fontFamily="@font/outfit"
+                    android:fontVariationSettings="'wght' 500"
+                    android:letterSpacing="0.14" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/wxIcon"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:importantForAccessibility="no" />
+
+                    <TextView
+                        android:id="@+id/wxTemp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:includeFontPadding="false"
+                        android:textColor="#FFF4F6F5"
+                        android:textSize="30sp"
+                        android:fontFamily="@font/outfit"
+                        android:fontVariationSettings="'wght' 400"
+                        android:letterSpacing="-0.02" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/wxSummary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:includeFontPadding="false"
+                    android:lineSpacingExtra="2dp"
+                    android:textColor="#FFF4F6F5"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/outfit"
+                    android:fontVariationSettings="'wght' 400" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/wxP0"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:includeFontPadding="false"
+                        android:lineSpacingExtra="3dp"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:textColor="#FFF4F6F5"
+                        android:textSize="9.5sp"
+                        android:fontFamily="@font/outfit"
+                        android:fontVariationSettings="'wght' 400" />
+                    <TextView
+                        android:id="@+id/wxP1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:includeFontPadding="false"
+                        android:lineSpacingExtra="3dp"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:textColor="#FFF4F6F5"
+                        android:textSize="9.5sp"
+                        android:fontFamily="@font/outfit"
+                        android:fontVariationSettings="'wght' 400" />
+                    <TextView
+                        android:id="@+id/wxP2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:includeFontPadding="false"
+                        android:lineSpacingExtra="3dp"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:textColor="#FFF4F6F5"
+                        android:textSize="9.5sp"
+                        android:fontFamily="@font/outfit"
+                        android:fontVariationSettings="'wght' 400" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/wxSource"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:includeFontPadding="false"
+                    android:textColor="#9EF4F6F5"
+                    android:textSize="7.5sp"
+                    android:fontFamily="@font/outfit"
+                    android:fontVariationSettings="'wght' 400" />
+            </LinearLayout>
+
+            <!-- Air quality card (haze_station); see Haze. -->
+            <LinearLayout
+                android:id="@+id/hazeCard"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="14dp"
+                android:paddingBottom="12dp"
+                android:visibility="invisible">
+
+                <TextView
+                    android:id="@+id/hzLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="#B8F4F6F5"
+                    android:textSize="9sp"
+                    android:fontFamily="@font/outfit"
+                    android:fontVariationSettings="'wght' 500"
+                    android:letterSpacing="0.14"
+                    android:singleLine="true"
+                    android:text="KUALITI UDARA · IPU" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <TextView
+                    android:id="@+id/hzValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="#FFF4F6F5"
+                    android:textSize="36sp"
+                    android:fontFamily="@font/outfit"
+                    android:fontVariationSettings="'wght' 400"
+                    android:letterSpacing="-0.03" />
+                    <TextView
+                    android:id="@+id/hzBand"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="#FF07140E"
+                    android:textSize="10.5sp"
+                    android:fontFamily="@font/outfit"
+                    android:fontVariationSettings="'wght' 600"
+                    android:layout_marginStart="10dp"
+                    android:paddingStart="9dp"
+                    android:paddingEnd="9dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:singleLine="true" />
+                </LinearLayout>
+
+                <com.gathin.tvhome.HazeBar
+                    android:id="@+id/hzBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="12dp"
+                    android:layout_marginTop="8dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:includeFontPadding="false"
+                        android:text="0"
+                        android:textColor="#A6F4F6F5"
+                        android:textSize="7.5sp"
+                        android:fontFamily="@font/outfit" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:includeFontPadding="false"
+                        android:text="51"
+                        android:textColor="#A6F4F6F5"
+                        android:textSize="7.5sp"
+                        android:fontFamily="@font/outfit" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:includeFontPadding="false"
+                        android:text="101"
+                        android:textColor="#A6F4F6F5"
+                        android:textSize="7.5sp"
+                        android:fontFamily="@font/outfit" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:includeFontPadding="false"
+                        android:text="201"
+                        android:textColor="#A6F4F6F5"
+                        android:textSize="7.5sp"
+                        android:fontFamily="@font/outfit" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:includeFontPadding="false"
+                        android:text="301+"
+                        android:textColor="#A6F4F6F5"
+                        android:textSize="7.5sp"
+                        android:fontFamily="@font/outfit" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/hzNote"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="#FFF4F6F5"
+                    android:textSize="10.5sp"
+                    android:fontFamily="@font/outfit"
+                    android:fontVariationSettings="'wght' 400"
+                    android:maxLines="2"
+                    android:ellipsize="end" />
+                <TextView
+                    android:id="@+id/hzSource"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:textColor="#9EF4F6F5"
+                    android:textSize="7.5sp"
+                    android:fontFamily="@font/outfit"
+                    android:fontVariationSettings="'wght' 400"
+                    android:layout_marginTop="5dp"
+                    android:singleLine="true"
+                    android:ellipsize="end" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -180,6 +695,23 @@
                         </LinearLayout>
                     </FrameLayout>
                 </LinearLayout>
+
+                <!-- Today's prayer times (prayer_zone), the next one bright; see Prayer. -->
+                <TextView
+                    android:id="@+id/prayerLine"
+                    android:gravity="left"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:includeFontPadding="false"
+                    android:textColor="#A6FFFFFF"
+                    android:textSize="15sp"
+                    android:fontFamily="@font/outfit"
+                    android:fontVariationSettings="'wght' 400"
+                    android:letterSpacing="0.04"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <LinearLayout

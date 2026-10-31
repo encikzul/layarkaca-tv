@@ -1,0 +1,11 @@
+{
+  "dock_apps": ["com.google.android.youtube.tv", "com.netflix.ninja", "com.disney.disneyplus", "com.stremio.one"],
+  "columns": 5,
+  "show_network_pill": false,
+  "prayer_zone": "WLY01",
+  "azan": true,
+  "beep_seconds": 7,
+  "weather_location": "Kuala Lumpur",
+  "weather_place": "Kuala Lumpur",
+  "haze_station": "Batu Muda"
+}
