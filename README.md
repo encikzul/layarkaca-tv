@@ -6,12 +6,10 @@ yang dibina atas [Glass TV](https://github.com/cocombee/glass-tv), bukan keluara
 
 ![Skrin utama LayarKaca](docs/screenshots-my/home.jpg)
 
-| | |
-|---|---|
-| ![Panel masuk waktu di atas aplikasi lain](docs/screenshots-my/waktu-solat.jpg) | ![Mod Ramadan](docs/screenshots-my/ramadan.jpg) |
-| *Peringatan masuk waktu, walaupun tengah tengok Netflix* | *Mod Ramadan: kiraan berbuka dan imsak* |
-| ![Pemilih lokasi dengan alat kawalan jauh](docs/screenshots-my/lokasi.jpg) | |
-| *Pilih lokasi dengan alat kawalan jauh* | |
+| | | |
+|---|---|---|
+| ![Panel masuk waktu di atas aplikasi lain](docs/screenshots-my/waktu-solat.jpg) | ![Mod Ramadan](docs/screenshots-my/ramadan.jpg) | ![Pemilih lokasi dengan alat kawalan jauh](docs/screenshots-my/lokasi.jpg) |
+| *Peringatan masuk waktu, walaupun tengah tengok Netflix* | *Mod Ramadan: kiraan berbuka dan imsak* | *Pilih lokasi dengan alat kawalan jauh* |
 
 *Gambar dari Sony KD-65X85L. Nama lokasi dikaburkan.*
 
