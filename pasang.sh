@@ -49,12 +49,14 @@ setup_python() {
   else
     VENV_ARGS=""; PYBIN=python3
     command -v python3 >/dev/null 2>&1 && python3 -c 'import venv' 2>/dev/null \
-      || die "Python 3 tiada. Mac: jalankan 'xcode-select --install', kemudian cuba lagi."
+      || die "Python 3 tiada. Mac: jalankan 'xcode-select --install'. Linux/ChromeOS: 'sudo apt install python3 python3-venv'. Kemudian cuba lagi."
   fi
   if ! tools/venv/bin/python -c 'import adb_shell' 2>/dev/null; then
     step "Menyediakan alat (sekali sahaja, 1 hingga 2 minit)..."
     rm -rf tools/venv
-    $PYBIN -m venv $VENV_ARGS tools/venv && tools/venv/bin/pip install -q -r tools/requirements.txt \
+    $PYBIN -m venv $VENV_ARGS tools/venv \
+      || die "Python tidak dapat membuat venv. Linux/ChromeOS: jalankan 'sudo apt install python3-venv python3-pip', kemudian cuba lagi."
+    tools/venv/bin/pip install -q -r tools/requirements.txt \
       || die "Gagal memasang alat Python. Semak sambungan internet dan cuba lagi."
   fi
   ok "Alat sedia"

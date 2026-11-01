@@ -22,11 +22,18 @@ dan cache dibersihkan sendiri.
 
 1. Di TV: **Settings → System → About**, tekan OK pada **Android TV OS build** 7 kali, kemudian
    **Developer options → USB debugging** → hidupkan. Catat alamat IP TV (**Settings → Network & Internet**).
-2. Di Mac atau Linux, buka Terminal dan tampal (telefon Android: dalam Termux, eksperimen):
+2. Tampal satu arahan:
+   - **Windows 10/11**: buka **PowerShell** dan tampal
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/NAMA-AKAUN/glass-tv-my/main/pasang.sh | bash
-```
+     ```powershell
+     irm https://raw.githubusercontent.com/NAMA-AKAUN/glass-tv-my/main/pasang.ps1 | iex
+     ```
+
+   - **Mac, Linux, ChromeOS (Linux)**: buka **Terminal** dan tampal; **telefon Android**: dalam Termux (eksperimen)
+
+     ```bash
+     curl -fsSL https://raw.githubusercontent.com/NAMA-AKAUN/glass-tv-my/main/pasang.sh | bash
+     ```
 
 3. Taip IP TV, tekan **Allow** di TV, pilih **1**, dan jangan sentuh alat kawalan jauh sehingga **Siap!**
 4. Di TV, pilih negeri, kawasan dan stesen udara dengan alat kawalan jauh.
@@ -69,7 +76,7 @@ TV dan peranti anda mesti pada **Wi-Fi yang sama**. Tiada kabel diperlukan.
 | Ada | Cara |
 |---|---|
 | Laptop macOS atau Linux | [Cara A](#cara-a-laptop): paling selamat dan sudah diuji |
-| Laptop Windows | Ikut panduan asal: [docs/CLEANYOURTV-README.md](docs/CLEANYOURTV-README.md) (skrip `.ps1`), kemudian pasang APK dari halaman Releases |
+| Laptop Windows | [Cara paling mudah](#cara-paling-mudah) (`pasang.ps1`); cara manual: skrip `.ps1` dalam [docs/CLEANYOURTV-README.md](docs/CLEANYOURTV-README.md), dengan `launcher\build-and-install.ps1 -Apk <fail.apk>` |
 | Telefon Android sahaja | [Cara B](#cara-b-telefon-android-eksperimen): **eksperimen**, belum diuji |
 | iPhone sahaja | Tidak boleh. iOS tiada alat ADB untuk bercakap dengan TV |
 

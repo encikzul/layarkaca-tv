@@ -7,7 +7,10 @@
 #        [-InputKeyService]   remote's Input button opens the input switcher (Google TV); re-pass on every install
 #        [-HomeKeyService]    remotes whose Home button sends KEYCODE_ALL_APPS (Xiaomi sticks)
 #        [-KeepHighContrastText]  leave Android's High contrast text on (it is switched off otherwise)
+#        [-Apk <file>]        install a ready-built APK (from the Releases page) instead of building one,
+#                             with the same checks and rollback; needs no JDK or Android SDK
 param(
+    [string]$Apk = '',
     [string]$TvHost = $env:TV_HOST,
     [string]$StockLauncher = '',
     [switch]$InputKeyService,
@@ -19,8 +22,11 @@ $ErrorActionPreference = 'Stop'
 $OutputEncoding = New-Object System.Text.UTF8Encoding $false
 if (-not $TvHost) { throw 'pass -TvHost <tv ip> or set $env:TV_HOST' }
 $env:TV_HOST = $TvHost
+# Resolve -Apk against the caller's directory before moving into launcher\.
+if ($Apk) { $Apk = (Resolve-Path $Apk).Path }
 Set-Location $PSScriptRoot
 
+if (-not $Apk) {
 if (-not $env:JAVA_HOME -or -not (Test-Path "$env:JAVA_HOME\bin\java.exe")) {
     $jbr = Get-ChildItem 'C:\Program Files\Android' -Directory -ErrorAction SilentlyContinue |
         ForEach-Object { Join-Path $_.FullName 'jbr' } | Where-Object { Test-Path "$_\bin\java.exe" } | Select-Object -First 1
@@ -34,6 +40,7 @@ if (-not (Test-Path local.properties)) {
 
 .\gradlew.bat assembleRelease -q --console=plain
 if ($LASTEXITCODE -ne 0) { throw 'Gradle build failed' }
+}
 
 $py = '..\tools\venv\Scripts\python.exe'
 # Which app owns Home differs by build; ask the TV, but only accept a launcher we recognise (the answer
@@ -67,7 +74,7 @@ if (-not $StockLauncher) {
 Write-Host "Stock launcher: $StockLauncher"
 $disableStock = if ($StockLauncher -eq 'none') { 'echo stock launcher left alone' } else { "pm disable-user --user 0 $StockLauncher" }
 
-$apk = 'app\build\outputs\apk\release\app-release.apk'
+$apk = if ($Apk) { $Apk } else { 'app\build\outputs\apk\release\app-release.apk' }
 
 # The safeguard, as in build-and-install.sh: from the install on, any failure puts the TV back as it was.
 # $env:SAFEGUARD_TEST = 'start' or 'home' fails that check on purpose and prints the rollback instead.
