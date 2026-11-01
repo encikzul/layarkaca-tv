@@ -1,5 +1,9 @@
 # Contributing
 
+> **Glass TV Malaysia:** keep the Malaysian features working in every change (prayer card and panel, Ramadan
+> mode, MET weather and warnings, air pollutant index, location picker, installers). Releases are made by pushing
+> a `v*` tag; see "Untuk penerbit repo ini" in [README-MY.md](README-MY.md).
+
 Thanks for helping more TVs lose their ads. Three kinds of contributions are especially welcome.
 
 ## 1. Add your TV model

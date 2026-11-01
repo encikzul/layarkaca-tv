@@ -1,3 +1,7 @@
+> **Glass TV Malaysia:** this is the original CleanYourTV guide, kept for reference and for the TV lists. To set up
+> a TV with prayer times, MET weather and the air pollutant index, use the one-command installer in
+> [README.md](../README.md) or the Malay guide [README-MY.md](../README-MY.md).
+
 <p align="center">
   <a href="https://cleanyour.tv"><img src="https://raw.githubusercontent.com/Gathin23/cleanyourtv/main/docs/banner.png" alt="CleanYourTV. Your TV, minus the ads." width="800"></a>
 </p>

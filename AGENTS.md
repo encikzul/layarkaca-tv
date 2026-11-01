@@ -1,5 +1,31 @@
 # Instructions for AI agents
 
+## This repository is Glass TV Malaysia: read this first
+
+This is **Glass TV Malaysia**, a fork of Glass TV that adds JAKIM prayer times, a prayer-time reminder panel,
+Ramadan mode, MET Malaysia weather and warnings, and the DOE air pollutant index. Set a TV up with these, never
+with the plain upstream launcher, and keep these features in any change you make.
+
+- **Install from the release, do not build.** The one-command installers do every step below with checks and a
+  menu: `pasang.sh` (macOS, Linux, ChromeOS, Termux) and `pasang.ps1` (Windows). Run them for the person, or
+  follow their steps by hand: connect and back up (steps 1 and 2 below), debloat with a tested list (step 3),
+  then install the signed APK from the latest release of `encikzul/glass-tv-my` (check it against its `.sha256`)
+  with `APK=<file> launcher/build-and-install.sh` (Windows: `launcher\build-and-install.ps1 -Apk <file>`). Build the
+  launcher yourself (step 4) only to change its code.
+- **After installing:** `appops set com.gathin.tvhome SYSTEM_ALERT_WINDOW allow` (the prayer panel over other
+  apps), then `am start -n com.gathin.tvhome/.PlaceActivity` and let the person choose state, area and air
+  station with the remote. That sets the JAKIM zone, MET district and APIMS station; it overrides the theme's
+  place keys. The `Lokasi` tile in the app grid opens it again.
+- **Theme keys** for the Malaysian features (`prayer_zone`, `azan`, `beep_seconds`, `ramadan_start`,
+  `weather_location`, `weather_place`, `haze_station`) are in [themes/README.md](themes/README.md); zones, MET
+  districts and stations are listed in [README-MY.md](README-MY.md). Test the panel with
+  `touch /sdcard/Android/data/com.gathin.tvhome/files/azan-test` and a Home press.
+- Talk to the person in Malay if they write in Malay. The user guide is [README-MY.md](README-MY.md).
+
+Everything below is the upstream playbook. Its safety rules apply unchanged.
+
+## The upstream playbook
+
 You are helping someone set up **Glass TV** on their own TV: on Android TV and Google TV, debloat it and install
 this launcher as the home screen, with pictures of places behind it; on LG webOS, install the webOS app. This file is the playbook. It is written for any brand and for any
 AI model, large or small. Follow it in order, and read [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
