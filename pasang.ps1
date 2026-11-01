@@ -1,7 +1,7 @@
 # Glass TV Malaysia: pemasang mudah untuk Windows 10 dan 11, dalam Bahasa Melayu.
 #
 #   Buka PowerShell dan tampal:
-#   irm https://raw.githubusercontent.com/NAMA-AKAUN/glass-tv-my/main/pasang.ps1 | iex
+#   irm https://raw.githubusercontent.com/encikzul/glass-tv-my/main/pasang.ps1 | iex
 #
 # atau, dari folder projek: powershell -ExecutionPolicy Bypass -File pasang.ps1
 # Sama seperti pasang.sh: tanya IP TV, sambung, sandaran, buang iklan untuk model yang diuji, muat turun dan
@@ -17,7 +17,7 @@ try { Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAc
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $OutputEncoding = New-Object System.Text.UTF8Encoding $false
 
-$Repo = if ($env:GLASSTV_REPO) { $env:GLASSTV_REPO } else { 'NAMA-AKAUN/glass-tv-my' }
+$Repo = if ($env:GLASSTV_REPO) { $env:GLASSTV_REPO } else { 'encikzul/glass-tv-my' }
 $Conf = Join-Path $HOME '.glass-tv-my.json'
 $Backups = Join-Path $HOME 'glass-tv-my-sandaran'
 $Pkg = 'com.gathin.tvhome'

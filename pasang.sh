@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Glass TV Malaysia: pemasang mudah dalam Bahasa Melayu.
 #
-#   curl -fsSL https://raw.githubusercontent.com/NAMA-AKAUN/glass-tv-my/main/pasang.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/encikzul/glass-tv-my/main/pasang.sh | bash
 #
 # atau, dari folder projek: bash pasang.sh
 # Ia bertanya alamat IP TV, menyambung, mengambil sandaran, membuang iklan untuk model yang sudah diuji,
@@ -9,7 +9,7 @@
 # membatalkan semuanya. Untuk ujian: APK=<fail.apk> bash pasang.sh memasang APK itu, bukan dari Releases.
 set -uo pipefail
 
-REPO="${GLASSTV_REPO:-NAMA-AKAUN/glass-tv-my}"
+REPO="${GLASSTV_REPO:-encikzul/glass-tv-my}"
 CONF="$HOME/.glass-tv-my"
 BACKUPS="$HOME/glass-tv-my-sandaran"
 PKG=com.gathin.tvhome

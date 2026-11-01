@@ -26,13 +26,13 @@ dan cache dibersihkan sendiri.
    - **Windows 10/11**: buka **PowerShell** dan tampal
 
      ```powershell
-     irm https://raw.githubusercontent.com/NAMA-AKAUN/glass-tv-my/main/pasang.ps1 | iex
+     irm https://raw.githubusercontent.com/encikzul/glass-tv-my/main/pasang.ps1 | iex
      ```
 
    - **Mac, Linux, ChromeOS (Linux)**: buka **Terminal** dan tampal; **telefon Android**: dalam Termux (eksperimen)
 
      ```bash
-     curl -fsSL https://raw.githubusercontent.com/NAMA-AKAUN/glass-tv-my/main/pasang.sh | bash
+     curl -fsSL https://raw.githubusercontent.com/encikzul/glass-tv-my/main/pasang.sh | bash
      ```
 
 3. Taip IP TV, tekan **Allow** di TV, pilih **1**, dan jangan sentuh alat kawalan jauh sehingga **Siap!**
@@ -88,7 +88,7 @@ APK itu dibina oleh GitHub Actions terus daripada kod repo ini, jadi anda boleh 
 Buka Terminal dan jalankan satu demi satu. Gantikan `192.168.1.50` dengan IP TV anda.
 
 ```bash
-git clone https://github.com/NAMA-AKAUN/glass-tv-my.git && cd glass-tv-my
+git clone https://github.com/encikzul/glass-tv-my.git && cd glass-tv-my
 python3 -m venv tools/venv && tools/venv/bin/pip install -r tools/requirements.txt
 export TV_HOST=192.168.1.50
 tools/venv/bin/python -I tools/tv.py --probe
@@ -163,7 +163,7 @@ kemudian tekan Home.
 
 ```bash
 pkg update && pkg install -y git python python-cryptography android-tools
-git clone https://github.com/NAMA-AKAUN/glass-tv-my.git && cd glass-tv-my
+git clone https://github.com/encikzul/glass-tv-my.git && cd glass-tv-my
 python -m venv --system-site-packages tools/venv && tools/venv/bin/pip install -r tools/requirements.txt
 export TV_HOST=192.168.1.50
 tools/venv/bin/python -I tools/tv.py --probe
@@ -174,8 +174,8 @@ tools/venv/bin/python -I tools/tv.py --probe
    - muat turun dan semak APK dalam Termux:
 
 ```bash
-curl -LO https://github.com/NAMA-AKAUN/glass-tv-my/releases/latest/download/glass-tv-my-v2.3-my.1.apk
-curl -LO https://github.com/NAMA-AKAUN/glass-tv-my/releases/latest/download/glass-tv-my-v2.3-my.1.apk.sha256
+curl -LO https://github.com/encikzul/glass-tv-my/releases/latest/download/glass-tv-my-v2.3-my.1.apk
+curl -LO https://github.com/encikzul/glass-tv-my/releases/latest/download/glass-tv-my-v2.3-my.1.apk.sha256
 sha256sum -c glass-tv-my-v2.3-my.1.apk.sha256
 APK=glass-tv-my-v2.3-my.1.apk bash launcher/build-and-install.sh
 ```
