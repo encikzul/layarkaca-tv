@@ -134,6 +134,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private String prayerZone = "";
     private boolean prayerAzan;
     private android.widget.TextClock malayDate;
+    /** Sent by PlaceActivity after a new place is saved: Home reads its settings again. */
+    static final String EXTRA_RELOAD = "com.gathin.tvhome.RELOAD";
     private final java.util.concurrent.atomic.AtomicBoolean prayerRefreshing = new java.util.concurrent.atomic.AtomicBoolean();
     /** The weather card and MET warning strip (weather_location); see Weather. */
     private View infoBlock, cardsRow, weatherCard, prayerCard, hazeCard;
@@ -324,6 +326,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         prayerLine = findViewById(R.id.prayerLine);
         prayerZone = cfg.prayerZone;
         prayerAzan = cfg.azan;
+        // First start with no place set anywhere: ask once, with the remote (the Lokasi tile asks again).
+        android.content.SharedPreferences placePrefs = getSharedPreferences(PlaceActivity.PREFS, MODE_PRIVATE);
+        if (prayerZone.isEmpty() && !placePrefs.getBoolean("asked", false)) {
+            placePrefs.edit().putBoolean("asked", true).apply();
+            handler.postDelayed(() -> startActivity(new Intent(this, PlaceActivity.class)), 1500);
+        }
         if (!prayerZone.isEmpty()) prayerLine.setVisibility(View.VISIBLE);
         if (!prayerZone.isEmpty() && !shamsi) {
             // The Hijri date goes on a small line under the date, which is written in Malay.
@@ -728,6 +736,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        if (intent != null && intent.getBooleanExtra(EXTRA_RELOAD, false)) {
+            recreate();   // a new place from PlaceActivity: read the settings again
+            return;
+        }
         if (intent == null || !intent.hasCategory(Intent.CATEGORY_HOME)) return;
         // Home pressed on Home goes back to the first app. Home pressed in another app comes back to
         // the app you left from: resetting then made the selection run from it to the first app.

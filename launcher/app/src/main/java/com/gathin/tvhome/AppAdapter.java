@@ -237,6 +237,9 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         builtApps = apps;
         Map<String, Integer> place = new HashMap<>();
         for (int i = 0; i < arranged.size(); i++) place.put(arranged.get(i), i);
+        // The location picker, as a tile of its own (it has no banner, so it shows its icon and name).
+        fresh.add(new Entry("Lokasi", new ComponentName(ctx, PlaceActivity.class), null,
+                ctx.getDrawable(R.drawable.ic_place)));
         Collections.sort(fresh, (a, b) -> {
             // The order someone arranged comes first; apps it has not seen yet go after it.
             Integer pa = place.get(a.component.flattenToShortString()), pb = place.get(b.component.flattenToShortString());

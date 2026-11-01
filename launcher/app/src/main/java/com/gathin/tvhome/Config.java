@@ -199,6 +199,16 @@ final class Config {
             cfg.ramadanStart = string(json, "ramadan_start", "");
             cfg.beepSeconds = integer(json, "beep_seconds", 7, 1, 60);
         }
+        // A place chosen on the TV (PlaceActivity) wins over the theme's.
+        android.content.SharedPreferences place = ctx.getSharedPreferences(PlaceActivity.PREFS, Context.MODE_PRIVATE);
+        String chosen = place.getString("prayer_zone", "");
+        if (chosen.matches("[A-Z]{3}\\d{2}")) {
+            cfg.prayerZone = chosen;
+            cfg.weatherLocation = place.getString("weather_location", "");
+            cfg.weatherPlace = place.getString("weather_place", "");
+            cfg.hazeStation = place.getString("haze_station", "");
+            cfg.azan = json == null || bool(json, "azan", true);
+        }
         return cfg;
     }
 

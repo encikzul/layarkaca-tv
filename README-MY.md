@@ -18,6 +18,22 @@ dan cache dibersihkan sendiri.
 > daripada sumber terbuka mereka (senarai di bawah). Untuk waktu solat, sentiasa rujuk
 > [e-Solat JAKIM](https://www.e-solat.gov.my) jika ragu.
 
+## Cara paling mudah
+
+1. Di TV: **Settings → System → About**, tekan OK pada **Android TV OS build** 7 kali, kemudian
+   **Developer options → USB debugging** → hidupkan. Catat alamat IP TV (**Settings → Network & Internet**).
+2. Di Mac atau Linux, buka Terminal dan tampal (telefon Android: dalam Termux, eksperimen):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/NAMA-AKAUN/glass-tv-my/main/pasang.sh | bash
+```
+
+3. Taip IP TV, tekan **Allow** di TV, pilih **1**, dan jangan sentuh alat kawalan jauh sehingga **Siap!**
+4. Di TV, pilih negeri, kawasan dan stesen udara dengan alat kawalan jauh.
+
+Arahan yang sama juga menukar lokasi, menguji panel waktu solat dan membatalkan semuanya. Lokasi boleh ditukar
+bila-bila masa melalui jubin **Lokasi** dalam senarai aplikasi. Langkah manual penuh ada di bawah.
+
 ## TV yang boleh dan tidak boleh
 
 | TV / kotak | Boleh? |
