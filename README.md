@@ -1,9 +1,10 @@
-# Glass TV Malaysia
+# LayarKaca
 
 **Skrin utama Android TV dan Google TV tanpa iklan, dengan waktu solat JAKIM, cuaca MET Malaysia dan bacaan
-jerebu JAS terus di depan mata.** Percuma, tanpa root, dan boleh dibatalkan bila-bila masa.
+jerebu JAS terus di depan mata.** Percuma, tanpa root, dan boleh dibatalkan bila-bila masa. Projek komuniti
+yang dibina atas [Glass TV](https://github.com/cocombee/glass-tv), bukan keluaran rasmi Glass TV.
 
-![Skrin utama Glass TV Malaysia](docs/screenshots-my/home.jpg)
+![Skrin utama LayarKaca](docs/screenshots-my/home.jpg)
 
 | | |
 |---|---|
@@ -32,13 +33,13 @@ jerebu JAS terus di depan mata.** Percuma, tanpa root, dan boleh dibatalkan bila
    - **Windows 10/11**: buka **PowerShell**
 
      ```powershell
-     irm https://raw.githubusercontent.com/encikzul/glass-tv-my/main/pasang.ps1 | iex
+     irm https://raw.githubusercontent.com/encikzul/layarkaca-tv/main/pasang.ps1 | iex
      ```
 
    - **Mac, Linux, Chromebook**: buka **Terminal** (telefon Android: Termux, eksperimen)
 
      ```bash
-     curl -fsSL https://raw.githubusercontent.com/encikzul/glass-tv-my/main/pasang.sh | bash
+     curl -fsSL https://raw.githubusercontent.com/encikzul/layarkaca-tv/main/pasang.sh | bash
      ```
 
 3. Taip IP TV, tekan **Allow** di TV, pilih **1**, dan jangan sentuh alat kawalan jauh sehingga **Siap!**
@@ -54,11 +55,11 @@ Chromecast with Google TV, Mi Box. **Tidak boleh:** Samsung, LG, Roku, VIDAA. Un
 Chromecast with Google TV di port HDMI. Senarai model yang diuji: [docs/DEVICES.md](docs/DEVICES.md).
 
 APK di halaman [Releases](../../releases) dibina oleh GitHub Actions terus daripada kod ini, dengan SHA-256 dan
-sijil tandatangan (`CN=Glass TV Malaysia`) untuk disemak.
+sijil tandatangan (`CN=LayarKaca`) untuk disemak.
 
 ## Kredit
 
-Glass TV Malaysia dibina atas **[Glass TV](https://github.com/cocombee/glass-tv)** oleh cocombee, yang dibina atas
+LayarKaca dibina atas **[Glass TV](https://github.com/cocombee/glass-tv)** oleh cocombee, yang dibina atas
 **[CleanYourTV](https://github.com/Gathin23/cleanyourtv)** oleh Gathin. Lesen MIT ([LICENSE](LICENSE)). Sejarah
 commit mereka dikekalkan dalam repo ini sebagai kredit; README asal ada di [README-GLASS-TV.md](README-GLASS-TV.md).
 Data: JAKIM (melalui [api.waktusolat.app](https://api.waktusolat.app)), MET Malaysia (melalui
@@ -67,7 +68,7 @@ Projek ini tidak berkaitan dengan JAKIM, MET Malaysia, JAS, Sony atau Google.
 
 ---
 
-*English: Glass TV Malaysia is an ad-free home screen for Android TV and Google TV with JAKIM prayer times,
+*English: LayarKaca is an ad-free home screen for Android TV and Google TV with JAKIM prayer times,
 MET Malaysia weather and warnings, the DOE air pollutant index and a Ramadan mode. It is a fork of
 [cocombee/glass-tv](https://github.com/cocombee/glass-tv); the original English documentation is in
 [README-GLASS-TV.md](README-GLASS-TV.md).*

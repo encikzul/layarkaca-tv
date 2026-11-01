@@ -1,4 +1,4 @@
-> **Glass TV Malaysia:** this is the original CleanYourTV guide, kept for reference and for the TV lists. To set up
+> **LayarKaca:** this is the original CleanYourTV guide, kept for reference and for the TV lists. To set up
 > a TV with prayer times, MET weather and the air pollutant index, use the one-command installer in
 > [README.md](../README.md) or the Malay guide [README-MY.md](../README-MY.md).
 

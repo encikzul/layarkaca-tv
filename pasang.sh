@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Glass TV Malaysia: pemasang mudah dalam Bahasa Melayu.
+# LayarKaca: pemasang mudah dalam Bahasa Melayu.
 #
-#   curl -fsSL https://raw.githubusercontent.com/encikzul/glass-tv-my/main/pasang.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/encikzul/layarkaca-tv/main/pasang.sh | bash
 #
 # atau, dari folder projek: bash pasang.sh
 # Ia bertanya alamat IP TV, menyambung, mengambil sandaran, membuang iklan untuk model yang sudah diuji,
@@ -9,9 +9,9 @@
 # membatalkan semuanya. Untuk ujian: APK=<fail.apk> bash pasang.sh memasang APK itu, bukan dari Releases.
 set -uo pipefail
 
-REPO="${GLASSTV_REPO:-encikzul/glass-tv-my}"
-CONF="$HOME/.glass-tv-my"
-BACKUPS="$HOME/glass-tv-my-sandaran"
+REPO="${LAYARKACA_REPO:-encikzul/layarkaca-tv}"
+CONF="$HOME/.layarkaca"
+BACKUPS="$HOME/layarkaca-sandaran"
 PKG=com.gathin.tvhome
 
 if [ -t 1 ]; then B=$'\e[1m'; G=$'\e[32m'; Y=$'\e[33m'; R=$'\e[31m'; N=$'\e[0m'; else B=; G=; Y=; R=; N=; fi
@@ -29,8 +29,8 @@ find_project() {
   local here
   here="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || true)"
   if [ -n "$here" ] && [ -f "$here/launcher/build-and-install.sh" ]; then DIR="$here"; return; fi
-  DIR="$HOME/glass-tv-my"
-  step "Memuat turun Glass TV Malaysia..."
+  DIR="$HOME/layarkaca-tv"
+  step "Memuat turun LayarKaca..."
   local tmp="$DIR.baru"
   rm -rf "$tmp" && mkdir -p "$tmp"
   curl -fsSL "https://codeload.github.com/$REPO/tar.gz/refs/heads/main" | tar -xz -C "$tmp" --strip-components 1 \
@@ -154,7 +154,7 @@ install() {
     fi
   fi
 
-  step "Langkah 4: muat turun Glass TV Malaysia"
+  step "Langkah 4: muat turun LayarKaca"
   local apk="${APK:-}"
   if [ -z "$apk" ]; then
     local urls
@@ -238,14 +238,14 @@ undo() {
 
 # ---------------------------------------------------------------------------------------------- main
 
-printf '%sGlass TV Malaysia%s: skrin utama tanpa iklan, dengan waktu solat, cuaca dan IPU.\n' "$B" "$N"
+printf '%sLayarKaca%s: skrin utama tanpa iklan, dengan waktu solat, cuaca dan IPU.\n' "$B" "$N"
 load_conf
 find_project
 setup_python
 connect
 while :; do
   step "Apa yang anda mahu buat?"
-  say "  1) Pasang atau kemas kini Glass TV Malaysia"
+  say "  1) Pasang atau kemas kini LayarKaca"
   say "  2) Tukar lokasi"
   say "  3) Uji panel waktu solat"
   say "  4) Batalkan semua (kembalikan TV seperti asal)"

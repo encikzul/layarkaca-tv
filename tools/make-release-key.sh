@@ -12,7 +12,7 @@ command -v keytool >/dev/null 2>&1 && keytool -help >/dev/null 2>&1 \
   || KEYTOOL="$(brew --prefix openjdk@17 2>/dev/null)/bin/keytool"
 echo "keytool asks for a password (6 characters or more). Remember it: it goes into GitHub as a secret."
 "$KEYTOOL" -genkeypair -keystore "$KS" -storetype PKCS12 -alias glasstv -keyalg RSA -keysize 3072 \
-  -validity 10000 -dname "CN=Glass TV Malaysia"
+  -validity 10000 -dname "CN=LayarKaca"
 base64 < "$KS" | tr -d '\n' > "$KS.b64"
 command -v pbcopy >/dev/null 2>&1 && pbcopy < "$KS.b64" && copied=" (already copied to the clipboard)" || copied=""
 cat <<MSG

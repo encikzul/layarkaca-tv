@@ -1,4 +1,4 @@
-# Glass TV Malaysia
+# LayarKaca
 
 Versi Malaysia bagi [Glass TV](https://github.com/cocombee/glass-tv): skrin utama yang ringan dan bebas iklan
 untuk Android TV dan Google TV, dengan tambahan untuk Malaysia:
@@ -26,13 +26,13 @@ dan cache dibersihkan sendiri.
    - **Windows 10/11**: buka **PowerShell** dan tampal
 
      ```powershell
-     irm https://raw.githubusercontent.com/encikzul/glass-tv-my/main/pasang.ps1 | iex
+     irm https://raw.githubusercontent.com/encikzul/layarkaca-tv/main/pasang.ps1 | iex
      ```
 
    - **Mac, Linux, ChromeOS (Linux)**: buka **Terminal** dan tampal; **telefon Android**: dalam Termux (eksperimen)
 
      ```bash
-     curl -fsSL https://raw.githubusercontent.com/encikzul/glass-tv-my/main/pasang.sh | bash
+     curl -fsSL https://raw.githubusercontent.com/encikzul/layarkaca-tv/main/pasang.sh | bash
      ```
 
 3. Taip IP TV, tekan **Allow** di TV, pilih **1**, dan jangan sentuh alat kawalan jauh sehingga **Siap!**
@@ -88,7 +88,7 @@ APK itu dibina oleh GitHub Actions terus daripada kod repo ini, jadi anda boleh 
 Buka Terminal dan jalankan satu demi satu. Gantikan `192.168.1.50` dengan IP TV anda.
 
 ```bash
-git clone https://github.com/encikzul/glass-tv-my.git && cd glass-tv-my
+git clone https://github.com/encikzul/layarkaca-tv.git && cd layarkaca-tv
 python3 -m venv tools/venv && tools/venv/bin/pip install -r tools/requirements.txt
 export TV_HOST=192.168.1.50
 tools/venv/bin/python -I tools/tv.py --probe
@@ -122,11 +122,11 @@ butang Home (hidupkan semula sebelum factory reset):
 tools/venv/bin/python -I tools/tv.py 'pm disable-user --user 0 com.google.android.tungsten.setupwraith'
 ```
 
-**5. Pasang Glass TV Malaysia.** Muat turun APK dari [Releases](../../releases), semak SHA-256, kemudian:
+**5. Pasang LayarKaca.** Muat turun APK dari [Releases](../../releases), semak SHA-256, kemudian:
 
 ```bash
-shasum -a 256 ~/Downloads/glass-tv-my-*.apk      # mesti sama dengan fail .sha256 di Releases
-APK=~/Downloads/glass-tv-my-v2.3-my.1.apk launcher/build-and-install.sh
+shasum -a 256 ~/Downloads/layarkaca-*.apk      # mesti sama dengan fail .sha256 di Releases
+APK=~/Downloads/layarkaca-v1.0.apk launcher/build-and-install.sh
 ```
 
 Jangan tekan alat kawalan jauh sehingga keluar `Installed. Press Home on the remote to see it.`
@@ -163,7 +163,7 @@ kemudian tekan Home.
 
 ```bash
 pkg update && pkg install -y git python python-cryptography android-tools
-git clone https://github.com/encikzul/glass-tv-my.git && cd glass-tv-my
+git clone https://github.com/encikzul/layarkaca-tv.git && cd layarkaca-tv
 python -m venv --system-site-packages tools/venv && tools/venv/bin/pip install -r tools/requirements.txt
 export TV_HOST=192.168.1.50
 tools/venv/bin/python -I tools/tv.py --probe
@@ -174,10 +174,10 @@ tools/venv/bin/python -I tools/tv.py --probe
    - muat turun dan semak APK dalam Termux:
 
 ```bash
-curl -LO https://github.com/encikzul/glass-tv-my/releases/latest/download/glass-tv-my-v2.3-my.1.apk
-curl -LO https://github.com/encikzul/glass-tv-my/releases/latest/download/glass-tv-my-v2.3-my.1.apk.sha256
-sha256sum -c glass-tv-my-v2.3-my.1.apk.sha256
-APK=glass-tv-my-v2.3-my.1.apk bash launcher/build-and-install.sh
+curl -LO https://github.com/encikzul/layarkaca-tv/releases/latest/download/layarkaca-v1.0.apk
+curl -LO https://github.com/encikzul/layarkaca-tv/releases/latest/download/layarkaca-v1.0.apk.sha256
+sha256sum -c layarkaca-v1.0.apk.sha256
+APK=layarkaca-v1.0.apk bash launcher/build-and-install.sh
 ```
 
 ## Google TV yang perlu pairing
@@ -353,7 +353,7 @@ Sekali sahaja: `bash tools/make-release-key.sh`, dan masukkan empat rahsia yang 
 setiap keluaran mesti ditandatangani dengan kunci yang sama.
 
 Setiap keluaran: naikkan `versionCode` dan `versionName` dalam `launcher/app/build.gradle`, commit, kemudian
-`git tag v2.3-my.2 && git push --tags`. GitHub Actions membina, menandatangani dan menerbitkan APK.
+`git tag v1.1 && git push --tags`. GitHub Actions membina, menandatangani dan menerbitkan APK.
 
 ## Kredit dan lesen
 

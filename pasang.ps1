@@ -1,7 +1,7 @@
-# Glass TV Malaysia: pemasang mudah untuk Windows 10 dan 11, dalam Bahasa Melayu.
+# LayarKaca: pemasang mudah untuk Windows 10 dan 11, dalam Bahasa Melayu.
 #
 #   Buka PowerShell dan tampal:
-#   irm https://raw.githubusercontent.com/encikzul/glass-tv-my/main/pasang.ps1 | iex
+#   irm https://raw.githubusercontent.com/encikzul/layarkaca-tv/main/pasang.ps1 | iex
 #
 # atau, dari folder projek: powershell -ExecutionPolicy Bypass -File pasang.ps1
 # Sama seperti pasang.sh: tanya IP TV, sambung, sandaran, buang iklan untuk model yang diuji, muat turun dan
@@ -17,9 +17,9 @@ try { Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAc
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $OutputEncoding = New-Object System.Text.UTF8Encoding $false
 
-$Repo = if ($env:GLASSTV_REPO) { $env:GLASSTV_REPO } else { 'encikzul/glass-tv-my' }
-$Conf = Join-Path $HOME '.glass-tv-my.json'
-$Backups = Join-Path $HOME 'glass-tv-my-sandaran'
+$Repo = if ($env:LAYARKACA_REPO) { $env:LAYARKACA_REPO } else { 'encikzul/layarkaca-tv' }
+$Conf = Join-Path $HOME '.layarkaca.json'
+$Backups = Join-Path $HOME 'layarkaca-sandaran'
 $Pkg = 'com.gathin.tvhome'
 
 function Say([string]$t) { Write-Host $t }
@@ -35,10 +35,10 @@ function Find-Project {
     if ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot 'launcher\build-and-install.ps1'))) {
         return $PSScriptRoot
     }
-    $dir = Join-Path $HOME 'glass-tv-my'
-    Step 'Memuat turun Glass TV Malaysia...'
-    $zip = Join-Path $env:TEMP 'glass-tv-my.zip'
-    $tmp = Join-Path $env:TEMP 'glass-tv-my-baru'
+    $dir = Join-Path $HOME 'layarkaca-tv'
+    Step 'Memuat turun LayarKaca...'
+    $zip = Join-Path $env:TEMP 'layarkaca.zip'
+    $tmp = Join-Path $env:TEMP 'layarkaca-baru'
     try {
         Invoke-WebRequest -UseBasicParsing -Uri "https://codeload.github.com/$Repo/zip/refs/heads/main" -OutFile $zip -ErrorAction Stop
     } catch { Fail 'Tidak dapat memuat turun projek. Semak sambungan internet dan cuba lagi.' }
@@ -188,7 +188,7 @@ function Install-GlassTv {
         Ok 'Wizard persediaan Google TV dimatikan (supaya butang Home kekal pada Glass TV)'
     }
 
-    Step 'Langkah 4: muat turun Glass TV Malaysia'
+    Step 'Langkah 4: muat turun LayarKaca'
     $apk = $env:APK
     if ($apk) {
         $apk = (Resolve-Path $apk).Path
@@ -223,7 +223,7 @@ function Install-GlassTv {
     Ok 'Glass TV dipasang dan menjadi skrin utama'
 
     if (-not ((T "[ -f /sdcard/Android/data/$Pkg/files/config.json ] && echo ADA") -match 'ADA')) {
-        $theme = Join-Path $env:TEMP 'glass-tv-my-tema'
+        $theme = Join-Path $env:TEMP 'layarkaca-tema'
         New-Item -ItemType Directory -Force -Path $theme | Out-Null
         $cfg = Get-Content (Join-Path $script:Dir 'themes\malaysia\config.json') -Raw | ConvertFrom-Json
         foreach ($k in @('prayer_zone', 'weather_location', 'weather_place', 'haze_station')) { $cfg.PSObject.Properties.Remove($k) }
@@ -265,14 +265,14 @@ function Undo-GlassTv {
 # ------------------------------------------------------------------------------------------------ main
 
 try {
-    Write-Host 'Glass TV Malaysia: skrin utama tanpa iklan, dengan waktu solat, cuaca dan IPU.' -ForegroundColor White
+    Write-Host 'LayarKaca: skrin utama tanpa iklan, dengan waktu solat, cuaca dan IPU.' -ForegroundColor White
     $script:C = Load-Conf
     $script:Dir = Find-Project
     $script:Py = Setup-Python $script:Dir
     Connect-Tv
     while ($true) {
         Step 'Apa yang anda mahu buat?'
-        Say '  1) Pasang atau kemas kini Glass TV Malaysia'
+        Say '  1) Pasang atau kemas kini LayarKaca'
         Say '  2) Tukar lokasi'
         Say '  3) Uji panel waktu solat'
         Say '  4) Batalkan semua (kembalikan TV seperti asal)'

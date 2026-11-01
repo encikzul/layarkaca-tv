@@ -1,6 +1,6 @@
 # The prompt
 
-> **Glass TV Malaysia:** this is the original upstream prompt. For a Malaysian setup (prayer times, MET weather,
+> **LayarKaca:** this is the original upstream prompt. For a Malaysian setup (prayer times, MET weather,
 > air pollutant index, Ramadan mode) use the one-command installer in [README.md](README.md) instead, or point
 > your assistant at [AGENTS.md](AGENTS.md), which starts with the Malaysian steps.
 

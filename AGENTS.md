@@ -1,15 +1,15 @@
 # Instructions for AI agents
 
-## This repository is Glass TV Malaysia: read this first
+## This repository is LayarKaca: read this first
 
-This is **Glass TV Malaysia**, a fork of Glass TV that adds JAKIM prayer times, a prayer-time reminder panel,
+This is **LayarKaca**, a fork of Glass TV that adds JAKIM prayer times, a prayer-time reminder panel,
 Ramadan mode, MET Malaysia weather and warnings, and the DOE air pollutant index. Set a TV up with these, never
 with the plain upstream launcher, and keep these features in any change you make.
 
 - **Install from the release, do not build.** The one-command installers do every step below with checks and a
   menu: `pasang.sh` (macOS, Linux, ChromeOS, Termux) and `pasang.ps1` (Windows). Run them for the person, or
   follow their steps by hand: connect and back up (steps 1 and 2 below), debloat with a tested list (step 3),
-  then install the signed APK from the latest release of `encikzul/glass-tv-my` (check it against its `.sha256`)
+  then install the signed APK from the latest release of `encikzul/layarkaca-tv` (check it against its `.sha256`)
   with `APK=<file> launcher/build-and-install.sh` (Windows: `launcher\build-and-install.ps1 -Apk <file>`). Build the
   launcher yourself (step 4) only to change its code.
 - **After installing:** `appops set com.gathin.tvhome SYSTEM_ALERT_WINDOW allow` (the prayer panel over other

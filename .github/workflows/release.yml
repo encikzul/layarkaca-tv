@@ -1,6 +1,6 @@
 name: Release
 
-# Push a tag like v2.3-my.1 and this builds the launcher, signs it with the project's own key (the
+# Push a tag like v1.0 and this builds the launcher, signs it with the project's own key (the
 # RELEASE_* secrets, made once with tools/make-release-key.sh), and publishes the APK on the Releases page
 # with its SHA-256 and signing certificate, so anyone can check the file they install.
 on:
@@ -42,7 +42,7 @@ jobs:
           ./gradlew --no-daemon testReleaseUnitTest assembleRelease
       - name: Checksum and certificate
         run: |
-          out="glass-tv-my-${GITHUB_REF_NAME}.apk"
+          out="layarkaca-${GITHUB_REF_NAME}.apk"
           cp launcher/app/build/outputs/apk/release/app-release.apk "$out"
           sha256sum "$out" > "$out.sha256"
           "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --print-certs "$out" > signing-cert.txt
@@ -52,9 +52,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          out="glass-tv-my-${GITHUB_REF_NAME}.apk"
+          out="layarkaca-${GITHUB_REF_NAME}.apk"
           {
-            echo "APK Glass TV Malaysia ${GITHUB_REF_NAME}, dibina oleh GitHub Actions daripada kod pada tag ini."
+            echo "APK LayarKaca ${GITHUB_REF_NAME}, dibina oleh GitHub Actions daripada kod pada tag ini."
             echo
             echo "SHA-256:"
             echo '```'
@@ -67,4 +67,4 @@ jobs:
             echo "Cara pasang: README-MY.md."
           } > notes.md
           gh release create "$GITHUB_REF_NAME" "$out" "$out.sha256" signing-cert.txt \
-            --title "Glass TV Malaysia ${GITHUB_REF_NAME}" --notes-file notes.md
+            --title "LayarKaca ${GITHUB_REF_NAME}" --notes-file notes.md
