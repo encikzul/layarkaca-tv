@@ -43,6 +43,16 @@ yang dibina atas [Glass TV](https://github.com/cocombee/glass-tv), bukan keluara
 3. Taip IP TV, tekan **Allow** di TV, pilih **1**, dan jangan sentuh alat kawalan jauh sehingga **Siap!**
 4. Pilih negeri, kawasan dan stesen udara di TV.
 
+**Apa yang anda akan nampak.** Taip nombor pilihan dan tekan Enter:
+
+![Menu pemasang LayarKaca: pilih 1 untuk pasang, 4 untuk kembalikan TV seperti asal](docs/screenshots-my/pasang-menu.png)
+
+Selepas memilih **1**, skrip berjalan sendiri sehingga **Siap!**:
+
+![Langkah pemasangan LayarKaca dari sandaran hingga pilih lokasi](docs/screenshots-my/pasang-langkah.png)
+
+*Pada Windows, tetingkap PowerShell berwarna biru dan tanda ✓ ditulis [OK]; pilihan dan langkahnya sama.*
+
 Arahan yang sama juga menukar lokasi, menguji panel waktu solat dan **membatalkan semuanya**.
 Panduan penuh, langkah manual, senarai zon dan stesen, dan penyelesaian masalah: **[README-MY.md](README-MY.md)**.
 

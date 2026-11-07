@@ -38,6 +38,16 @@ dan cache dibersihkan sendiri.
 3. Taip IP TV, tekan **Allow** di TV, pilih **1**, dan jangan sentuh alat kawalan jauh sehingga **Siap!**
 4. Di TV, pilih negeri, kawasan dan stesen udara dengan alat kawalan jauh.
 
+**Apa yang anda akan nampak.** Taip nombor pilihan dan tekan Enter:
+
+![Menu pemasang LayarKaca: pilih 1 untuk pasang, 4 untuk kembalikan TV seperti asal](docs/screenshots-my/pasang-menu.png)
+
+Selepas memilih **1**, skrip berjalan sendiri sehingga **Siap!**:
+
+![Langkah pemasangan LayarKaca dari sandaran hingga pilih lokasi](docs/screenshots-my/pasang-langkah.png)
+
+*Pada Windows, tetingkap PowerShell berwarna biru dan tanda ✓ ditulis [OK]; pilihan dan langkahnya sama.*
+
 Arahan yang sama juga menukar lokasi, menguji panel waktu solat dan membatalkan semuanya. Lokasi boleh ditukar
 bila-bila masa melalui jubin **Lokasi** dalam senarai aplikasi. Langkah manual penuh ada di bawah.
 
@@ -203,7 +213,7 @@ Ini berlaku jika skrin utama asal sudah dimatikan tetapi LayarKaca tidak sempat 
 Mi Box S (MDZ-22-AB) dengan versi skrip sebelum 7 November 2026: iklan dibuang dahulu, kemudian pemasangan gagal.
 TV dan aplikasi tidak rosak; cuma butang Home tiada apa-apa untuk dibuka.
 
-Jalankan semula arahan pemasang dari laptop atau telefon yang sama, pada Wi-Fi yang sama:
+Jalankan semula arahan pemasang dari laptop atau telefon yang sama, pada Wi-Fi yang sama (menu seperti [gambar ini](docs/screenshots-my/pasang-menu.png)):
 
 - pilih **4** (Batalkan semua): semua aplikasi yang dimatikan dihidupkan semula dan skrin utama asal kembali; atau
 - pilih **1** (Pasang): skrip kini mengesan skrin gelap, menghidupkan semula skrin utama asal dahulu, dan
