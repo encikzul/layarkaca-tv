@@ -107,7 +107,9 @@ tools/venv/bin/python -I tools/tv.py 'pm list packages -d' > backup/disabled.txt
 tools/venv/bin/python -I tools/tv.py 'cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME' > backup/home.txt
 ```
 
-**4. Debloat** (pilihan, tetapi disyorkan). Jika model anda ada dalam [examples/](examples/), baca fail
+**4. Debloat** (pilihan, tetapi disyorkan). **Lebih selamat buat langkah ini selepas langkah 5 berjaya:** senarai
+sesetengah TV (contohnya Mi Box S) mematikan skrin utama asal, jadi jika langkah 5 kemudian gagal, TV menjadi gelap.
+Pemasang automatik sudah mengikut susunan itu. Jika model anda ada dalam [examples/](examples/), baca fail
 `debloat.txt` itu dahulu dan buang baris yang anda guna, kemudian:
 
 ```bash

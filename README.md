@@ -55,6 +55,20 @@ Chromecast with Google TV di port HDMI. Senarai model yang diuji: [docs/DEVICES.
 APK di halaman [Releases](../../releases) dibina oleh GitHub Actions terus daripada kod ini, dengan SHA-256 dan
 sijil tandatangan (`CN=LayarKaca`) untuk disemak.
 
+## Kemas kini
+
+**7 November 2026: pemasang lebih selamat.** Pada sesetengah TV (contohnya Xiaomi Mi Box S), pemasang lama boleh
+menyebabkan skrin gelap: iklan dibuang dahulu, kemudian jika pemasangan gagal, TV tiada skrin utama. Kini:
+
+- iklan hanya dibuang **selepas** LayarKaca berjaya menjadi skrin utama;
+- pemasang mengesan skrin gelap dan menghidupkan semula skrin utama asal sendiri;
+- penyelamat skrin ditukar kepada jam LayarKaca bila penyelamat skrin Google dimatikan.
+
+TV anda gelap selepas memasang? Jalankan semula arahan di atas dan pilih **1** (pasang semula) atau **4**
+(kembalikan TV seperti asal). Butiran: [Skrin TV gelap selepas memasang](README-MY.md#skrin-tv-gelap-selepas-memasang).
+
+**1 November 2026: v1.0.** Nama baharu LayarKaca (dahulu Glass TV Malaysia).
+
 ## Kredit
 
 LayarKaca dibina atas **[Glass TV](https://github.com/cocombee/glass-tv)** oleh cocombee, yang dibina atas
