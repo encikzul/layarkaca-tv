@@ -195,6 +195,25 @@ adb tcpip 5555
 
 Selepas itu `tools/tv.py` berfungsi seperti biasa.
 
+## Skrin TV gelap selepas memasang
+
+Ini berlaku jika skrin utama asal sudah dimatikan tetapi LayarKaca tidak sempat dipasang. Contohnya pada Xiaomi
+Mi Box S (MDZ-22-AB) dengan versi skrip sebelum 7 November 2026: iklan dibuang dahulu, kemudian pemasangan gagal.
+TV dan aplikasi tidak rosak; cuma butang Home tiada apa-apa untuk dibuka.
+
+Jalankan semula arahan pemasang dari laptop atau telefon yang sama, pada Wi-Fi yang sama:
+
+- pilih **4** (Batalkan semua): semua aplikasi yang dimatikan dihidupkan semula dan skrin utama asal kembali; atau
+- pilih **1** (Pasang): skrip kini mengesan skrin gelap, menghidupkan semula skrin utama asal dahulu, dan
+  membuang iklan hanya selepas LayarKaca berjaya menjadi skrin utama.
+
+Jika fail tetapan pemasang sudah hilang, jalankan ini dalam folder `layarkaca-tv` (gantikan IP):
+
+```bash
+export TV_HOST=192.168.1.50
+tools/venv/bin/python tools/tv.py 'pm enable com.google.android.tvlauncher; pm enable com.mitv.tvhome.atv; input keyevent KEYCODE_HOME'
+```
+
 ## Tetapan tempat
 
 Semua dalam `config.json` tema anda. Selepas mengubahnya, hantar semula dengan `tools/theme.sh`.

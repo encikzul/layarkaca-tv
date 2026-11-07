@@ -5,7 +5,7 @@
 #
 # atau, dari folder projek: bash pasang.sh
 # Ia bertanya alamat IP TV, menyambung, mengambil sandaran, membuang iklan untuk model yang sudah diuji,
-# memuat turun dan menyemak APK, memasang Glass TV, dan membuka pemilih lokasi di TV. Menu yang sama boleh
+# memuat turun dan menyemak APK, memasang LayarKaca, dan membuka pemilih lokasi di TV. Menu yang sama boleh
 # membatalkan semuanya. Untuk ujian: APK=<fail.apk> bash pasang.sh memasang APK itu, bukan dari Releases.
 set -uo pipefail
 
@@ -64,7 +64,7 @@ setup_python() {
 
 load_conf() { [ -f "$CONF" ] && . "$CONF"; return 0; }
 save_conf() {
-  { printf 'TV_HOST=%q\n' "${TV_HOST:-}"; printf 'LIST=%q\n' "${LIST:-}"; printf 'SETUP_OFF=%q\n' "${SETUP_OFF:-}"; } > "$CONF"
+  { printf 'TV_HOST=%q\n' "${TV_HOST:-}"; printf 'LIST=%q\n' "${LIST:-}"; printf 'SETUP_OFF=%q\n' "${SETUP_OFF:-}"; printf 'SAVER=%q\n' "${SAVER:-}"; } > "$CONF"
 }
 
 T() { tools/venv/bin/python -I tools/tv.py "$@"; }
@@ -107,6 +107,33 @@ connect() {
   save_conf
 }
 
+# Skrin utama asal yang mungkin dimatikan oleh senarai buang iklan atau pemasangan.
+STOCK_HOMES="com.google.android.tvlauncher com.google.android.apps.tv.launcherx com.google.android.leanbacklauncher com.mitv.tvhome com.mitv.tvhome.atv"
+
+# Jika butang Home tidak membuka apa-apa (TV gelap), hidupkan semula skrin utama asal.
+ensure_home() {
+  local r p
+  r=$(T 'cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME' 2>/dev/null | tail -n 1 | tr -d '\r')
+  case "$r" in
+    */*FallbackHome*|"") ;;
+    */*) return 0 ;;
+  esac
+  warn "TV ini tiada skrin utama yang hidup (skrin gelap). Menghidupkan semula skrin utama asal..."
+  for p in $STOCK_HOMES; do
+    T "pm list packages -d $p" 2>/dev/null | grep -qx "package:$p" && T "pm enable $p" >/dev/null && ok "Dihidupkan: $p"
+  done
+  T 'input keyevent KEYCODE_HOME' >/dev/null
+}
+
+# Senarai yang mematikan penyelamat skrin Google (Backdrop) mesti menukar penyelamat skrin dahulu,
+# jika tidak TV boleh menjadi gelap bila dibiarkan.
+use_clock_saver() {
+  grep -qE '^\s*com\.google\.android\.backdrop' "$1" || return 0
+  SAVER=$(T 'settings get secure screensaver_components' | tail -n 1 | tr -d '\r')
+  T "settings put secure screensaver_components $PKG/.ClockDream" >/dev/null && save_conf \
+    && ok "Penyelamat skrin ditukar kepada jam LayarKaca"
+}
+
 stock_launcher() {
   if T 'pm list packages com.google.android.apps.tv.launcherx' | grep -q launcherx; then
     echo com.google.android.apps.tv.launcherx
@@ -118,8 +145,9 @@ stock_launcher() {
 # ---------------------------------------------------------------------------------------------- actions
 
 install() {
-  [ "${SDK:-0}" -ge 26 ] 2>/dev/null || die "TV ini Android API $SDK. Skrin utama Glass TV perlukan Android 8 (API 26) ke atas. Tiada apa-apa diubah."
+  [ "${SDK:-0}" -ge 26 ] 2>/dev/null || die "TV ini Android API $SDK. LayarKaca perlukan Android 8 (API 26) ke atas. Tiada apa-apa diubah."
   [ "$MAKER" = Amazon ] && die "Ini Fire TV: Fire OS sentiasa mengambil semula butang Home. Tiada apa-apa diubah."
+  ensure_home
 
   step "Langkah 2: sandaran"
   local dir="$BACKUPS/$DEVICE-$(date +%Y%m%d-%H%M)"
@@ -130,31 +158,7 @@ install() {
   [ -s "$dir/packages.txt" ] || die "Sandaran kosong; sambungan terputus. Tiada apa-apa diubah."
   ok "Sandaran di $dir"
 
-  step "Langkah 3: buang iklan"
-  local list="" f
-  for f in examples/*/debloat.txt; do
-    if head -3 "$f" | grep -qE "[ (,]$DEVICE([ ,)]|$)"; then list="$f"; break; fi
-  done
-  if [ -n "$list" ]; then
-    local n; n=$(grep -cvE '^\s*(#|$)' "$list")
-    say "Ada senarai yang sudah diuji untuk TV ini: $list ($n aplikasi iklan, penjejak dan demo)."
-    say "Aplikasi hanya dimatikan, tidak dibuang. HDMI, alat kawalan jauh, Wi-Fi, carian suara dan cast dikekalkan."
-    if yes_no "Matikan aplikasi dalam senarai ini?"; then
-      bash tools/disable.sh "$list" >/dev/null && ok "Iklan dan penjejak dimatikan" && LIST="$list" && save_conf
-    else
-      say "Dilangkau."
-    fi
-  else
-    say "Tiada senarai yang diuji untuk $DEVICE; buang iklan dilangkau (Glass TV tetap tiada iklan)."
-  fi
-  if [ -z "$list" ] || [ -z "${LIST:-}" ]; then
-    if T 'pm list packages com.google.android.tungsten.setupwraith' | grep -q setupwraith; then
-      T 'pm disable-user --user 0 com.google.android.tungsten.setupwraith' >/dev/null && SETUP_OFF=1 && save_conf
-      ok "Wizard persediaan Google TV dimatikan (supaya butang Home kekal pada Glass TV)"
-    fi
-  fi
-
-  step "Langkah 4: muat turun LayarKaca"
+  step "Langkah 3: muat turun LayarKaca"
   local apk="${APK:-}"
   if [ -z "$apk" ]; then
     local urls
@@ -179,16 +183,46 @@ for a in json.load(sys.stdin).get("assets", []):
     ok "Menggunakan APK tempatan: $apk"
   fi
 
-  step "Langkah 5: pasang"
+  step "Langkah 4: pasang"
   warn "JANGAN SENTUH alat kawalan jauh sehingga selesai (kira-kira 30 saat)."
   local log; log=$(mktemp)
   if ! APK="$apk" INPUT_KEY_SERVICE=1 bash launcher/build-and-install.sh >"$log" 2>&1; then
     tail -5 "$log"
     grep -q UPDATE_INCOMPATIBLE "$log" \
-      && say "Glass TV versi lain sudah ada di TV ini. Pilih 'Batalkan semua' dalam menu, kemudian pasang semula."
-    die "Pemasangan tidak berjaya. Skrin utama asal TV sudah dipulihkan."
+      && say "LayarKaca versi lain sudah ada di TV ini. Pilih 'Batalkan semua' dalam menu, kemudian pasang semula."
+    ensure_home
+    die "Pemasangan tidak berjaya. Skrin utama asal TV dikekalkan; tiada aplikasi dimatikan."
   fi
-  ok "Glass TV dipasang dan menjadi skrin utama"
+  ok "LayarKaca dipasang dan menjadi skrin utama"
+
+  # Buang iklan hanya SELEPAS LayarKaca menjadi skrin utama. Senarai mematikan skrin utama asal
+  # (contoh Mi Box S: PatchWall dan tvlauncher); jika dibuat lebih awal dan pemasangan gagal, TV tiada
+  # skrin utama langsung dan menjadi gelap.
+  step "Langkah 5: buang iklan"
+  local list="" f
+  for f in examples/*/debloat.txt; do
+    if head -3 "$f" | grep -qE "[ (,]$DEVICE([ ,)]|$)"; then list="$f"; break; fi
+  done
+  if [ -n "$list" ]; then
+    local n; n=$(grep -cvE '^\s*(#|$)' "$list")
+    say "Ada senarai yang sudah diuji untuk TV ini: $list ($n aplikasi iklan, penjejak dan demo)."
+    say "Aplikasi hanya dimatikan, tidak dibuang. HDMI, alat kawalan jauh, Wi-Fi, carian suara dan cast dikekalkan."
+    if yes_no "Matikan aplikasi dalam senarai ini?"; then
+      bash tools/disable.sh "$list" >/dev/null && ok "Iklan dan penjejak dimatikan" && LIST="$list" && save_conf
+      use_clock_saver "$list"
+    else
+      say "Dilangkau."
+    fi
+  else
+    say "Tiada senarai yang diuji untuk $DEVICE; buang iklan dilangkau (skrin utama LayarKaca tetap tiada iklan)."
+  fi
+  if [ -z "$list" ] || [ -z "${LIST:-}" ]; then
+    if T 'pm list packages com.google.android.tungsten.setupwraith' | grep -q setupwraith; then
+      T 'pm disable-user --user 0 com.google.android.tungsten.setupwraith' >/dev/null && SETUP_OFF=1 && save_conf
+      ok "Wizard persediaan Google TV dimatikan (supaya butang Home kekal pada LayarKaca)"
+    fi
+  fi
+
 
   if ! T "[ -f /sdcard/Android/data/$PKG/files/config.json ] && echo ADA" 2>/dev/null | grep -q ADA; then
     local theme; theme=$(mktemp -d)
@@ -221,7 +255,7 @@ test_panel() {
 
 undo() {
   step "Batalkan semua"
-  say "Ini menghidupkan semula aplikasi yang dimatikan, mengembalikan skrin utama asal dan membuang Glass TV."
+  say "Ini menghidupkan semula aplikasi yang dimatikan, mengembalikan skrin utama asal dan membuang LayarKaca."
   yes_no "Teruskan?" || { say "Tiada apa-apa diubah."; return; }
   local stock; stock=$(stock_launcher)
   if [ -n "${LIST:-}" ] && [ -f "$LIST" ]; then
@@ -229,10 +263,11 @@ undo() {
   fi
   T "pm enable $stock" >/dev/null
   [ -n "${SETUP_OFF:-}" ] && T 'pm enable com.google.android.tungsten.setupwraith' >/dev/null
+  case "${SAVER:-}" in */*) T "settings put secure screensaver_components $SAVER" >/dev/null ;; esac
   T "cmd package set-home-activity $stock" >/dev/null 2>&1 || true
-  T "pm uninstall $PKG" >/dev/null && ok "Glass TV dibuang"
+  T "pm uninstall $PKG" >/dev/null && ok "LayarKaca dibuang"
   T 'input keyevent KEYCODE_HOME' >/dev/null
-  LIST=""; SETUP_OFF=""; save_conf
+  LIST=""; SETUP_OFF=""; SAVER=""; save_conf
   ok "TV kembali seperti asal. Anda boleh matikan USB debugging di Developer options."
 }
 

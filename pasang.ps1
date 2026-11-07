@@ -100,8 +100,11 @@ function Setup-Python([string]$dir) {
 }
 
 function Load-Conf {
-    if (Test-Path $Conf) { try { return Get-Content $Conf -Raw | ConvertFrom-Json } catch { } }
-    return [pscustomobject]@{ TvHost = ''; List = ''; SetupOff = '' }
+    $c = [pscustomobject]@{ TvHost = ''; List = ''; SetupOff = ''; Saver = '' }
+    if (Test-Path $Conf) {
+        try { $old = Get-Content $Conf -Raw | ConvertFrom-Json; foreach ($p in $old.PSObject.Properties) { $c.($p.Name) = $p.Value } } catch { }
+    }
+    return $c
 }
 function Save-Conf { $script:C | ConvertTo-Json | Out-File -Encoding ascii $Conf }
 
@@ -144,6 +147,29 @@ function Connect-Tv {
     Save-Conf
 }
 
+$StockHomes = @('com.google.android.tvlauncher', 'com.google.android.apps.tv.launcherx', 'com.google.android.leanbacklauncher', 'com.mitv.tvhome', 'com.mitv.tvhome.atv')
+
+# Jika butang Home tidak membuka apa-apa (TV gelap), hidupkan semula skrin utama asal.
+function Ensure-Home {
+    $r = @(T 'cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME') | Select-Object -Last 1
+    $r = "$r".Trim()
+    if ($r -match '/' -and $r -notmatch 'FallbackHome') { return }
+    Warn 'TV ini tiada skrin utama yang hidup (skrin gelap). Menghidupkan semula skrin utama asal...'
+    foreach ($p in $StockHomes) {
+        if (@(T "pm list packages -d $p") -contains "package:$p") { T "pm enable $p" | Out-Null; Ok "Dihidupkan: $p" }
+    }
+    T 'input keyevent KEYCODE_HOME' | Out-Null
+}
+
+# Senarai yang mematikan penyelamat skrin Google (Backdrop) mesti menukar penyelamat skrin dahulu.
+function Use-ClockSaver([string]$list) {
+    if (-not (Get-Content $list | Where-Object { $_ -match '^\s*com\.google\.android\.backdrop' })) { return }
+    $script:C.Saver = ("" + (@(T 'settings get secure screensaver_components') | Select-Object -Last 1)).Trim()
+    T "settings put secure screensaver_components $Pkg/.ClockDream" | Out-Null
+    Save-Conf
+    Ok 'Penyelamat skrin ditukar kepada jam LayarKaca'
+}
+
 function Stock-Launcher {
     if ((T 'pm list packages com.google.android.apps.tv.launcherx') -match 'launcherx') { return 'com.google.android.apps.tv.launcherx' }
     return 'com.google.android.tvlauncher'
@@ -152,8 +178,9 @@ function Stock-Launcher {
 # ------------------------------------------------------------------------------------------------ actions
 
 function Install-GlassTv {
-    if ([int]$script:Sdk -lt 26) { Fail "TV ini Android API $script:Sdk. Skrin utama Glass TV perlukan Android 8 (API 26) ke atas. Tiada apa-apa diubah." }
+    if ([int]$script:Sdk -lt 26) { Fail "TV ini Android API $script:Sdk. Skrin utama LayarKaca perlukan Android 8 (API 26) ke atas. Tiada apa-apa diubah." }
     if ($script:Maker -eq 'Amazon') { Fail 'Ini Fire TV: Fire OS sentiasa mengambil semula butang Home. Tiada apa-apa diubah.' }
+    Ensure-Home
 
     Step 'Langkah 2: sandaran'
     $bdir = Join-Path $Backups ("$script:Device-" + (Get-Date -Format 'yyyyMMdd-HHmm'))
@@ -164,31 +191,7 @@ function Install-GlassTv {
     if ((Get-Item (Join-Path $bdir 'packages.txt')).Length -eq 0) { Fail 'Sandaran kosong; sambungan terputus. Tiada apa-apa diubah.' }
     Ok "Sandaran di $bdir"
 
-    Step 'Langkah 3: buang iklan'
-    $list = $null
-    $pattern = '[ (,]' + [regex]::Escape($script:Device) + '([ ,)]|$)'
-    foreach ($f in Get-ChildItem (Join-Path $script:Dir 'examples') -Filter debloat.txt -Recurse) {
-        if ((Get-Content $f.FullName -TotalCount 3) -match $pattern) { $list = $f.FullName; break }
-    }
-    if ($list) {
-        $n = @(Get-Content $list | Where-Object { $_ -notmatch '^\s*(#|$)' }).Count
-        Say "Ada senarai yang sudah diuji untuk TV ini ($n aplikasi iklan, penjejak dan demo)."
-        Say 'Aplikasi hanya dimatikan, tidak dibuang. HDMI, alat kawalan jauh, Wi-Fi, carian suara dan cast dikekalkan.'
-        if (YesNo 'Matikan aplikasi dalam senarai ini?') {
-            & (Join-Path $script:Dir 'tools\disable.ps1') -TvHost $env:TV_HOST $list | Out-Null
-            $script:C.List = $list; Save-Conf
-            Ok 'Iklan dan penjejak dimatikan'
-        } else { Say 'Dilangkau.' }
-    } else {
-        Say "Tiada senarai yang diuji untuk $script:Device; buang iklan dilangkau (Glass TV tetap tiada iklan)."
-    }
-    if (-not $script:C.List -and ((T 'pm list packages com.google.android.tungsten.setupwraith') -match 'setupwraith')) {
-        T 'pm disable-user --user 0 com.google.android.tungsten.setupwraith' | Out-Null
-        $script:C.SetupOff = '1'; Save-Conf
-        Ok 'Wizard persediaan Google TV dimatikan (supaya butang Home kekal pada Glass TV)'
-    }
-
-    Step 'Langkah 4: muat turun LayarKaca'
+    Step 'Langkah 3: muat turun LayarKaca'
     $apk = $env:APK
     if ($apk) {
         $apk = (Resolve-Path $apk).Path
@@ -210,17 +213,46 @@ function Install-GlassTv {
         Ok 'APK disemak (SHA-256 sepadan)'
     }
 
-    Step 'Langkah 5: pasang'
+    Step 'Langkah 4: pasang'
     Warn 'JANGAN SENTUH alat kawalan jauh sehingga selesai (kira-kira 30 saat).'
     try {
         & (Join-Path $script:Dir 'launcher\build-and-install.ps1') -TvHost $env:TV_HOST -Apk $apk -InputKeyService | Out-Host
     } catch {
         Say "$_"
-        if ("$_" -match 'UPDATE_INCOMPATIBLE') { Say "Glass TV versi lain sudah ada di TV ini. Pilih 'Batalkan semua' dalam menu, kemudian pasang semula." }
-        Fail 'Pemasangan tidak berjaya. Skrin utama asal TV sudah dipulihkan.'
+        if ("$_" -match 'UPDATE_INCOMPATIBLE') { Say "LayarKaca versi lain sudah ada di TV ini. Pilih 'Batalkan semua' dalam menu, kemudian pasang semula." }
+        Ensure-Home
+        Fail 'Pemasangan tidak berjaya. Skrin utama asal TV dikekalkan; tiada aplikasi dimatikan.'
     }
     Set-Location $script:Dir
-    Ok 'Glass TV dipasang dan menjadi skrin utama'
+    Ok 'LayarKaca dipasang dan menjadi skrin utama'
+
+    # Buang iklan hanya SELEPAS LayarKaca menjadi skrin utama: senarai mematikan skrin utama asal
+    # (contoh Mi Box S), jadi jika dibuat lebih awal dan pemasangan gagal, TV menjadi gelap.
+    Step 'Langkah 5: buang iklan'
+    $list = $null
+    $pattern = '[ (,]' + [regex]::Escape($script:Device) + '([ ,)]|$)'
+    foreach ($f in Get-ChildItem (Join-Path $script:Dir 'examples') -Filter debloat.txt -Recurse) {
+        if ((Get-Content $f.FullName -TotalCount 3) -match $pattern) { $list = $f.FullName; break }
+    }
+    if ($list) {
+        $n = @(Get-Content $list | Where-Object { $_ -notmatch '^\s*(#|$)' }).Count
+        Say "Ada senarai yang sudah diuji untuk TV ini ($n aplikasi iklan, penjejak dan demo)."
+        Say 'Aplikasi hanya dimatikan, tidak dibuang. HDMI, alat kawalan jauh, Wi-Fi, carian suara dan cast dikekalkan.'
+        if (YesNo 'Matikan aplikasi dalam senarai ini?') {
+            & (Join-Path $script:Dir 'tools\disable.ps1') -TvHost $env:TV_HOST $list | Out-Null
+            $script:C.List = $list; Save-Conf
+            Ok 'Iklan dan penjejak dimatikan'
+            Use-ClockSaver $list
+        } else { Say 'Dilangkau.' }
+    } else {
+        Say "Tiada senarai yang diuji untuk $script:Device; buang iklan dilangkau (skrin utama LayarKaca tetap tiada iklan)."
+    }
+    if (-not $script:C.List -and ((T 'pm list packages com.google.android.tungsten.setupwraith') -match 'setupwraith')) {
+        T 'pm disable-user --user 0 com.google.android.tungsten.setupwraith' | Out-Null
+        $script:C.SetupOff = '1'; Save-Conf
+        Ok 'Wizard persediaan Google TV dimatikan (supaya butang Home kekal pada LayarKaca)'
+    }
+
 
     if (-not ((T "[ -f /sdcard/Android/data/$Pkg/files/config.json ] && echo ADA") -match 'ADA')) {
         $theme = Join-Path $env:TEMP 'layarkaca-tema'
@@ -246,7 +278,7 @@ function Install-GlassTv {
 
 function Undo-GlassTv {
     Step 'Batalkan semua'
-    Say 'Ini menghidupkan semula aplikasi yang dimatikan, mengembalikan skrin utama asal dan membuang Glass TV.'
+    Say 'Ini menghidupkan semula aplikasi yang dimatikan, mengembalikan skrin utama asal dan membuang LayarKaca.'
     if (-not (YesNo 'Teruskan?')) { Say 'Tiada apa-apa diubah.'; return }
     $stock = Stock-Launcher
     if ($script:C.List -and (Test-Path $script:C.List)) {
@@ -255,10 +287,11 @@ function Undo-GlassTv {
     }
     T "pm enable $stock" | Out-Null
     if ($script:C.SetupOff) { T 'pm enable com.google.android.tungsten.setupwraith' | Out-Null }
+    if ("$($script:C.Saver)" -match '/') { T "settings put secure screensaver_components $($script:C.Saver)" | Out-Null }
     T "pm uninstall $Pkg" | Out-Null
-    Ok 'Glass TV dibuang'
+    Ok 'LayarKaca dibuang'
     T 'input keyevent KEYCODE_HOME' | Out-Null
-    $script:C.List = ''; $script:C.SetupOff = ''; Save-Conf
+    $script:C.List = ''; $script:C.SetupOff = ''; $script:C.Saver = ''; Save-Conf
     Ok 'TV kembali seperti asal. Anda boleh matikan USB debugging di Developer options.'
 }
 
