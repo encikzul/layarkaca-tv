@@ -37,6 +37,7 @@ public final class AzanReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        LayarKacaApp.useMalaysianTime(context);
         final Context ctx = context.getApplicationContext();
         final Config cfg = Config.load(ctx);
         int prayer = intent.getIntExtra(Prayer.EXTRA_PRAYER, -1);

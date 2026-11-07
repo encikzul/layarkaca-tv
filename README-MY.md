@@ -226,6 +226,14 @@ export TV_HOST=192.168.1.50
 tools/venv/bin/python tools/tv.py 'pm enable com.google.android.tvlauncher; pm enable com.mitv.tvhome.atv; input keyevent KEYCODE_HOME'
 ```
 
+## Kad waktu solat tidak muncul
+
+Cuaca dan IPU keluar, tetapi kad waktu solat tiada dan panel masuk waktu tidak muncul? Lihat jam di skrin utama. Jika
+jamnya salah (contohnya pukul 12 malam ketika siang), zon waktu TV bukan Malaysia; ini biasa pada box yang dibeli dari
+luar negara. LayarKaca 1.1 ke atas menggunakan waktu Malaysia sendiri: jalankan semula arahan pemasang dan pilih
+**1** untuk mengemas kini. Pemasang juga cuba menukar zon waktu TV; jika tidak berjaya, tukar sendiri di
+**Settings → System → Date & time → Time zone → Kuala Lumpur (GMT+08:00)**, supaya jam aplikasi lain juga betul.
+
 ## Tetapan tempat
 
 Semua dalam `config.json` tema anda. Selepas mengubahnya, hantar semula dengan `tools/theme.sh`.

@@ -134,6 +134,25 @@ use_clock_saver() {
     && ok "Penyelamat skrin ditukar kepada jam LayarKaca"
 }
 
+# Waktu solat dan panel masuk waktu perlukan zon waktu Malaysia. Box yang dibeli dari luar negara kadang-kadang
+# kekal pada zon lain (contohnya New York), dan jam TV menjadi salah. LayarKaca membetulkan dirinya sendiri, tetapi
+# jam aplikasi lain tetap salah, jadi cuba betulkan TV juga.
+fix_timezone() {
+  local z
+  z=$(T 'date +%z' 2>/dev/null | tail -n 1 | tr -d '\r ')
+  [ "$z" = "+0800" ] && return 0
+  warn "Zon waktu TV ini bukan Malaysia ($z, $(T 'getprop persist.sys.timezone' | tail -n 1 | tr -d '\r'))."
+  T 'settings put global auto_time_zone 0; service call alarm 3 s16 Asia/Kuala_Lumpur' >/dev/null 2>&1
+  z=$(T 'date +%z' 2>/dev/null | tail -n 1 | tr -d '\r ')
+  if [ "$z" = "+0800" ]; then
+    ok "Zon waktu TV ditukar kepada Kuala Lumpur (GMT+8)"
+  else
+    T 'settings put global auto_time_zone 1' >/dev/null 2>&1
+    say "LayarKaca tetap guna waktu Malaysia, tetapi jam TV untuk aplikasi lain masih salah. Betulkan di TV:"
+    say "  Settings → System → Date & time → Time zone → Kuala Lumpur (GMT+08:00)"
+  fi
+}
+
 stock_launcher() {
   if T 'pm list packages com.google.android.apps.tv.launcherx' | grep -q launcherx; then
     echo com.google.android.apps.tv.launcherx
@@ -236,6 +255,7 @@ json.dump(c, open(sys.argv[2], "w"), indent=2)' themes/malaysia/config.json "$th
   fi
 
   T "appops set $PKG SYSTEM_ALERT_WINDOW allow" >/dev/null && ok "Panel waktu solat dibenarkan"
+  fix_timezone
 
   step "Langkah 6: pilih lokasi di TV"
   T "am start -n $PKG/.PlaceActivity" >/dev/null

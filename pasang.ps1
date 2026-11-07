@@ -170,6 +170,20 @@ function Use-ClockSaver([string]$list) {
     Ok 'Penyelamat skrin ditukar kepada jam LayarKaca'
 }
 
+# Waktu solat perlukan zon waktu Malaysia; box dari luar negara kadang-kadang kekal pada zon lain.
+function Fix-Timezone {
+    $z = ("" + (@(T 'date +%z') | Select-Object -Last 1)).Trim()
+    if ($z -eq '+0800') { return }
+    $id = ("" + (@(T 'getprop persist.sys.timezone') | Select-Object -Last 1)).Trim()
+    Warn "Zon waktu TV ini bukan Malaysia ($z, $id)."
+    T 'settings put global auto_time_zone 0; service call alarm 3 s16 Asia/Kuala_Lumpur' | Out-Null
+    $z = ("" + (@(T 'date +%z') | Select-Object -Last 1)).Trim()
+    if ($z -eq '+0800') { Ok 'Zon waktu TV ditukar kepada Kuala Lumpur (GMT+8)'; return }
+    T 'settings put global auto_time_zone 1' | Out-Null
+    Say 'LayarKaca tetap guna waktu Malaysia, tetapi jam TV untuk aplikasi lain masih salah. Betulkan di TV:'
+    Say '  Settings -> System -> Date & time -> Time zone -> Kuala Lumpur (GMT+08:00)'
+}
+
 function Stock-Launcher {
     if ((T 'pm list packages com.google.android.apps.tv.launcherx') -match 'launcherx') { return 'com.google.android.apps.tv.launcherx' }
     return 'com.google.android.tvlauncher'
@@ -267,6 +281,7 @@ function Install-GlassTv {
 
     T "appops set $Pkg SYSTEM_ALERT_WINDOW allow" | Out-Null
     Ok 'Panel waktu solat dibenarkan'
+    Fix-Timezone
 
     Step 'Langkah 6: pilih lokasi di TV'
     T "am start -n $Pkg/.PlaceActivity" | Out-Null

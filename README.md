@@ -67,6 +67,11 @@ sijil tandatangan (`CN=LayarKaca`) untuk disemak.
 
 ## Kemas kini
 
+**7 November 2026: v1.1, waktu solat pada TV dengan zon waktu luar negara.** Sesetengah box yang dibeli dari luar
+negara kekal pada zon waktu lain (contohnya New York): jam TV salah, kad waktu solat tidak muncul dan panel masuk
+waktu tidak keluar. LayarKaca kini menggunakan waktu Malaysia sendiri, dan pemasang cuba membetulkan zon waktu TV.
+Untuk mengemas kini, jalankan arahan di atas dan pilih **1**.
+
 **7 November 2026: pemasang lebih selamat.** Pada sesetengah TV (contohnya Xiaomi Mi Box S), pemasang lama boleh
 menyebabkan skrin gelap: iklan dibuang dahulu, kemudian jika pemasangan gagal, TV tiada skrin utama. Kini:
 
