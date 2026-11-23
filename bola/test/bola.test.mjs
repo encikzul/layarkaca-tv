@@ -91,7 +91,7 @@ test("feed sorts live, upcoming and results", () => {
   assert.deepEqual(f.results.map((m) => m.id), [4, 1]);
 });
 
-test("refresh with a fake API-Football: the requests it makes and the state it keeps", async () => {
+test("refresh with a fake API-Football: spread over minutes, then quiet, then live", async () => {
   const calls = [];
   const get = async (key, path) => {
     calls.push(path);
@@ -101,18 +101,27 @@ test("refresh with a fake API-Football: the requests it makes and the state it k
     if (path.startsWith("/fixtures?team=1538&next")) return [fx(12, 4321, [1538, "Malaysia"], [1, "Vietnam"], "NS", T + 48 * 3600_000)];
     return [];
   };
-  const { state } = await refresh({}, T, { API_FOOTBALL_KEY: "k", LIVE_SECONDS: "300" }, get);
-  assert.equal(calls.filter((c) => c.startsWith("/leagues")).length, 6);
+  const env = { API_FOOTBALL_KEY: "k", LIVE_SECONDS: "300" };
+  // First request: 8 at most (the free plan allows 10 a minute).
+  let r = await refresh({}, T, env, get);
+  assert.equal(calls.length, 8);
+  assert.equal(r.state.error, undefined);
+  // Another TV asks 20 seconds later: same minute, nothing more.
+  r = await refresh(r.state, T + 20_000, env, get);
+  assert.equal(calls.length, 8);
+  // A minute later the rest goes out: 16 in all, none twice.
+  r = await refresh(r.state, T + 61_000, env, get);
+  assert.equal(calls.length, 16);
+  assert.equal(new Set(calls).size, 16);
   assert.ok(calls.includes("/fixtures?league=39&season=2026&from=2026-11-22&to=2026-11-26&timezone=Asia/Kuala_Lumpur"));
-  assert.equal(calls.length, 6 + 6 + 4);
-  assert.deepEqual(Object.keys(state.matches).sort(), ["11", "12"]);
-  // Next request, a minute later: nothing to fetch.
-  calls.length = 0;
-  await refresh(state, T + 60_000, { API_FOOTBALL_KEY: "k" }, get);
-  assert.equal(calls.length, 0);
+  assert.deepEqual(Object.keys(r.state.matches).sort(), ["11", "12"]);
+  assert.ok(r.state.rangeAt && r.state.teamsAt);
+  // Later the same day: nothing to fetch.
+  r = await refresh(r.state, T + 30 * 60_000, env, get);
+  assert.equal(calls.length, 16);
   // When Liverpool kick off, one request for the live score.
-  const r = await refresh(state, T + 3600_000 + 60_000, { API_FOOTBALL_KEY: "k" }, get);
-  assert.deepEqual(calls, ["/fixtures?ids=11&timezone=Asia/Kuala_Lumpur"]);
+  r = await refresh(r.state, T + 3600_000 + 60_000, env, get);
+  assert.deepEqual(calls.slice(16), ["/fixtures?ids=11&timezone=Asia/Kuala_Lumpur"]);
   assert.ok(r.state.liveAt);
 });
 

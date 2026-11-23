@@ -7,6 +7,8 @@ compatibility_date = "2026-11-01"
 # Seconds between live-score checks while a match is on. 300 fits API-Football's free plan (100 a day);
 # 60 needs the Pro plan.
 LIVE_SECONDS = "300"
+# Requests in any 60 seconds; API-Football's free plan allows 10.
+PER_MINUTE = "8"
 
 [[kv_namespaces]]
 binding = "BOLA"

@@ -114,47 +114,73 @@ async function api(key, path) {
   return d.response || [];
 }
 
-/** Brings the state up to date, as far as the plan says. Returns the new state; never throws. */
+const STOP = Symbol("per-minute budget used");
+
+/**
+ * Brings the state up to date, as far as the plan says. Returns the new state; never throws.
+ * API-Football also limits requests per minute (10 on the free plan), so at most PER_MINUTE requests go out in
+ * any 60 seconds; what is left waits for a later request, and the work done so far is kept.
+ */
 export async function refresh(state, now, env, get = api) {
   const key = env.API_FOOTBALL_KEY;
   const liveSeconds = Number(env.LIVE_SECONDS) || 300;
+  const perMinute = Number(env.PER_MINUTE) || 8;
   const s = { seasons: {}, matches: {}, ...state };
   const todo = plan(s, now, liveSeconds);
   let changed = false;
-  const put = (list) => { for (const f of list) { const m = shape(f); if (m) s.matches[m.id] = m; } changed = true; };
+  const win = s.window && now - s.window.at < 60_000 ? { ...s.window } : { at: now, calls: 0 };
+  const call = async (path) => {
+    if (win.calls >= perMinute) throw STOP;
+    win.calls++;
+    changed = true;
+    return get(key, path);
+  };
+  const put = (list) => { for (const f of list) { const m = shape(f); if (m) s.matches[m.id] = m; } };
+  const today = mytDate(now);
   try {
+    // Live scores first: they are what people are watching.
+    if (todo.live.length) {
+      put(await call(`/fixtures?ids=${todo.live.join("-")}&timezone=${TZ}`));
+      s.liveAt = now;
+    }
     for (const id of todo.seasons) {
-      const r = await get(key, `/leagues?id=${id}&current=true`);
+      const r = await call(`/leagues?id=${id}&current=true`);
       const season = r[0]?.seasons?.find((x) => x.current)?.year ?? r[0]?.seasons?.at(-1)?.year;
-      if (season) s.seasons = { ...s.seasons, [id]: { season, at: now } };
-      changed = true;
+      s.seasons = { ...s.seasons, [id]: { season: season ?? null, at: now } };
     }
     if (todo.range) {
+      if (s.rangeDay !== today) { s.rangeDay = today; s.rangeDone = []; }
       const from = mytDate(now, -1), to = mytDate(now, 3);
       for (const id of Object.keys(LEAGUES)) {
+        if (s.rangeDone.includes(id)) continue;
         const season = s.seasons[id]?.season;
-        if (season) put(await get(key, `/fixtures?league=${id}&season=${season}&from=${from}&to=${to}&timezone=${TZ}`));
+        if (season) put(await call(`/fixtures?league=${id}&season=${season}&from=${from}&to=${to}&timezone=${TZ}`));
+        s.rangeDone = [...s.rangeDone, id];
       }
       s.rangeAt = now;
     }
     if (todo.teams) {
+      if (s.teamsDay !== today) { s.teamsDay = today; s.teamsDone = []; }
       for (const id of Object.keys(TEAMS)) {
-        put(await get(key, `/fixtures?team=${id}&last=2&timezone=${TZ}`));
-        put(await get(key, `/fixtures?team=${id}&next=2&timezone=${TZ}`));
+        for (const which of ["last", "next"]) {
+          const k = id + ":" + which;
+          if (s.teamsDone.includes(k)) continue;
+          put(await call(`/fixtures?team=${id}&${which}=2&timezone=${TZ}`));
+          s.teamsDone = [...s.teamsDone, k];
+        }
       }
       s.teamsAt = now;
-    }
-    if (todo.live.length) {
-      put(await get(key, `/fixtures?ids=${todo.live.join("-")}&timezone=${TZ}`));
-      s.liveAt = now;
     }
     delete s.error;
     delete s.errorAt;
   } catch (e) {
-    s.error = String(e.message || e).slice(0, 200);
-    s.errorAt = now;
-    changed = true;
+    if (e !== STOP) {
+      s.error = String(e.message || e).slice(0, 200);
+      s.errorAt = now;
+      changed = true;
+    }
   }
+  s.window = win;
   s.matches = prune(s.matches, now);
   if (changed) s.updated = now;
   return { state: s, changed };
