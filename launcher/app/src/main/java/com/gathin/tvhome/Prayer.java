@@ -28,13 +28,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Malaysian prayer times for one JAKIM zone (config prayer_zone, e.g. SGR01), from api.waktusolat.app,
- * cached one file per month in the app's files directory, and the alarm that plays the azan (AzanReceiver).
- * One request per month and zone; nothing is sent but the zone code.
+ * Malaysian prayer times for one JAKIM zone (config prayer_zone, e.g. SGR01), from api.waktusolat.app, or from
+ * JAKIM's own e-solat when that is down, cached one file per month in the app's files directory, and the alarm
+ * that plays the azan (AzanReceiver). This month and next are kept, so a source that is down for days around the
+ * end of a month does not leave the TV without times. Nothing is sent but the zone code.
  */
 final class Prayer {
     private static final String TAG = "TvHome.Prayer";
@@ -47,6 +49,9 @@ final class Prayer {
     static final String EXTRA_AT = "at";
     private static final Pattern CLOCK = Pattern.compile("(\\d{1,2}):(\\d{2})(?::(\\d{2}))?");
     private static volatile long lastFailure;
+    private static final String WAKTUSOLAT = "https://api.waktusolat.app/v2/solat/";
+    private static final String ESOLAT = "https://www.e-solat.gov.my/index.php?r=esolatApi/takwimsolat&period=year&zone=";
+    private static final String[] ESOLAT_KEYS = {"imsak", "fajr", "syuruk", "dhuhr", "asr", "maghrib", "isha"};
 
     private Prayer() {
     }
@@ -55,12 +60,13 @@ final class Prayer {
         return new File(ctx.getFilesDir(), "solat-" + zone + "-" + year + "-" + month + ".json");
     }
 
-    /** Downloads the months of today and tomorrow when they are not cached yet. Blocking: never on the main thread. */
+    /** Downloads this month and next when they are not cached yet. Blocking: never on the main thread. */
     static void ensure(Context ctx, String zone) {
         if (zone == null || zone.isEmpty()) return;
         Calendar c = Calendar.getInstance();
         fetchIfMissing(ctx, zone, c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1);
-        c.add(Calendar.DAY_OF_MONTH, 1);
+        c.set(Calendar.DAY_OF_MONTH, 1);
+        c.add(Calendar.MONTH, 1);
         fetchIfMissing(ctx, zone, c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1);
     }
 
@@ -68,33 +74,126 @@ final class Prayer {
         File f = cacheFile(ctx, zone, year, month);
         if (f.isFile() && f.length() > 0) return;
         if (System.currentTimeMillis() - lastFailure < 30 * 60_000L) return;   // offline: try again later
-        HttpURLConnection conn = null;
         try {
-            URL url = new URL("https://api.waktusolat.app/v2/solat/" + zone + "?year=" + year + "&month=" + month);
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(15_000);
-            conn.setReadTimeout(15_000);
-            conn.setRequestProperty("Accept", "application/json");
-            int code = conn.getResponseCode();
-            if (code != 200) throw new Exception("HTTP " + code);
-            byte[] body;
-            try (InputStream in = conn.getInputStream()) {
-                body = readAll(in, 512 * 1024);
-            }
+            byte[] body = download(WAKTUSOLAT + zone + "?year=" + year + "&month=" + month);
             JSONObject json = new JSONObject(new String(body, StandardCharsets.UTF_8));
             if (days(json) == null) throw new Exception("no prayer list in the response");
-            File tmp = new File(f.getPath() + ".tmp");
-            try (FileOutputStream out = new FileOutputStream(tmp)) {
-                out.write(body);
-            }
-            if (!tmp.renameTo(f)) throw new Exception("could not save " + f.getName());
+            save(f, body);
             Log.i(TAG, "cached " + f.getName());
+            return;
+        } catch (Exception e) {
+            Log.w(TAG, "waktusolat.app " + zone + " " + year + "-" + month + " failed: " + e + "; trying e-solat");
+        }
+        try {
+            fetchESolatYear(ctx, zone, year);
+            if (!f.isFile()) throw new Exception("e-solat has no " + year + "-" + month);
         } catch (Exception e) {
             lastFailure = System.currentTimeMillis();
             Log.w(TAG, "fetching " + zone + " " + year + "-" + month + " failed: " + e);
-        } finally {
-            if (conn != null) conn.disconnect();
         }
+    }
+
+    /**
+     * JAKIM's e-solat gives a whole year in one request, with clock times ("06:06:00") and dates ("01-Jan-2026").
+     * Each month goes into the same cache file and shape as waktusolat.app's (epoch seconds per prayer), so the
+     * rest of this class reads both alike. Months already cached are left as they are.
+     */
+    private static void fetchESolatYear(Context ctx, String zone, int year) throws Exception {
+        JSONObject json = new JSONObject(new String(download(ESOLAT + zone), StandardCharsets.UTF_8));
+        if (!zone.equalsIgnoreCase(json.optString("zone"))) throw new Exception("e-solat answered for another zone");
+        JSONArray list = json.optJSONArray("prayerTime");
+        if (list == null) throw new Exception("no prayerTime in e-solat's response");
+        JSONArray[] months = new JSONArray[13];
+        for (int i = 0; i < list.length(); i++) {
+            JSONObject o = list.optJSONObject(i);
+            int[] date = o != null ? esolatDate(o.optString("date")) : null;
+            if (date == null || date[0] != year) continue;
+            JSONObject day = new JSONObject();
+            day.put("day", date[2]);
+            day.put("hijri", o.optString("hijri"));
+            boolean complete = true;
+            for (String k : ESOLAT_KEYS) {
+                long t = esolatMillis(o.optString("date"), o.optString(k));
+                if (t > 0) day.put(k, t / 1000L);
+                else if (!k.equals("syuruk") && !k.equals("imsak")) complete = false;
+            }
+            if (!complete) continue;
+            if (months[date[1]] == null) months[date[1]] = new JSONArray();
+            months[date[1]].put(day);
+        }
+        int saved = 0;
+        for (int m = 1; m <= 12; m++) {
+            if (months[m] == null) continue;
+            File f = cacheFile(ctx, zone, year, m);
+            if (f.isFile() && f.length() > 0) continue;
+            JSONObject out = new JSONObject();
+            out.put("zone", zone);
+            out.put("year", year);
+            out.put("month_number", m);
+            out.put("source", "e-solat.gov.my");
+            out.put("prayers", months[m]);
+            save(f, out.toString().getBytes(StandardCharsets.UTF_8));
+            saved++;
+        }
+        Log.i(TAG, "e-solat " + zone + " " + year + ": cached " + saved + " months");
+    }
+
+    /** Month abbreviations e-solat uses (Malay: Mac, Mei, Ogos, Okt, Dis), with the English ones too. */
+    private static final String[][] MONTHS = {{"jan"}, {"feb"}, {"mac", "mar"}, {"apr"}, {"mei", "may"}, {"jun"},
+            {"jul"}, {"ogo", "aug"}, {"sep"}, {"okt", "oct"}, {"nov"}, {"dis", "dec"}};
+
+    /** {year, month, day} from e-solat's "01-Jan-2026", "01-Ogos-2026" or "01-Dis-2026", or null. */
+    static int[] esolatDate(String date) {
+        Matcher m = Pattern.compile("^(\\d{1,2})-([A-Za-z]{3,9})-(\\d{4})$").matcher(date == null ? "" : date.trim());
+        if (!m.find()) return null;
+        String name = m.group(2).substring(0, 3).toLowerCase(Locale.ROOT);
+        int month = 0;
+        for (int i = 0; i < 12 && month == 0; i++) {
+            for (String a : MONTHS[i]) if (a.equals(name)) month = i + 1;
+        }
+        int day = Integer.parseInt(m.group(1));
+        if (month == 0 || day < 1 || day > 31) return null;
+        return new int[]{Integer.parseInt(m.group(3)), month, day};
+    }
+
+    /** e-solat's date and clock ("01-Jan-2026", "06:06:00") in epoch milliseconds, Malaysian time; -1 if unreadable. */
+    static long esolatMillis(String date, String clock) {
+        int[] d = esolatDate(date);
+        Matcher m = CLOCK.matcher(clock == null ? "" : clock.trim());
+        if (d == null || !m.matches()) return -1;
+        int h = Integer.parseInt(m.group(1)), min = Integer.parseInt(m.group(2));
+        int sec = m.group(3) != null ? Integer.parseInt(m.group(3)) : 0;
+        if (h > 23 || min > 59 || sec > 59) return -1;
+        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("Asia/Kuala_Lumpur"), Locale.ROOT);
+        c.clear();
+        c.set(d[0], d[1] - 1, d[2], h, min, sec);
+        return c.getTimeInMillis();
+    }
+
+    private static byte[] download(String address) throws Exception {
+        HttpURLConnection conn = (HttpURLConnection) new URL(address).openConnection();
+        try {
+            conn.setConnectTimeout(15_000);
+            conn.setReadTimeout(15_000);
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android TV) LayarKaca");
+            int code = conn.getResponseCode();
+            if (code != 200) throw new Exception("HTTP " + code);
+            try (InputStream in = conn.getInputStream()) {
+                return readAll(in, 512 * 1024);
+            }
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+    /** Writes through a temporary file, so a half-written month is never read as the real one. */
+    private static void save(File f, byte[] body) throws Exception {
+        File tmp = new File(f.getPath() + ".tmp");
+        try (FileOutputStream out = new FileOutputStream(tmp)) {
+            out.write(body);
+        }
+        if (!tmp.renameTo(f)) throw new Exception("could not save " + f.getName());
     }
 
     /** The five times of that day in epoch milliseconds, Subuh first, or null when they are not cached. */
