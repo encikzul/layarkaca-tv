@@ -96,6 +96,9 @@ export function feed(state, now) {
   return {
     v: 1,
     updated: state.updated || 0,
+    // API-Football's last error, if the last attempt failed: shown so a problem can be seen from outside.
+    // It is API-Football's message, never the key.
+    ...(state.error ? { error: state.error, errorAt: state.errorAt } : {}),
     live: all.filter((m) => LIVE.has(m.st)),
     upcoming: all.filter((m) => m.st === "NS" && m.ko > now - 3 * HOUR).slice(0, 8),
     results: all.filter((m) => DONE.has(m.st) && m.ko >= startToday - 24 * HOUR).reverse().slice(0, 10),

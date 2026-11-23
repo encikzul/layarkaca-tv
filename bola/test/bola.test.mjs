@@ -123,3 +123,9 @@ test("an API failure is kept and backs off", async () => {
   assert.equal(state.errorAt, T);
   assert.deepEqual(plan(state, T + 60_000, 300).seasons, []);
 });
+
+test("the feed shows API-Football's last error, without the key", () => {
+  const f = feed({ matches: {}, error: "API-Football: {\"plan\":\"no access\"}", errorAt: T }, T);
+  assert.match(f.error, /no access/);
+  assert.equal(feed({ matches: {} }, T).error, undefined);
+});
