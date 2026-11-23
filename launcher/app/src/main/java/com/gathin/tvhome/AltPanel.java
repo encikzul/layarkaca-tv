@@ -202,12 +202,22 @@ final class AltPanel {
         clp.leftMargin = px(8);
         v.addView(chip, clp);
         c.addView(v);
+        // The same coloured scale as the Klasik card: Baik to Berbahaya, with a mark at this reading.
+        HazeBar scale = new HazeBar(ctx, null);
+        scale.setValue(hz.api);
+        c.addView(scale, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, px(12)));
+        LinearLayout marks = new LinearLayout(ctx);
+        marks.setPadding(0, px(3), 0, 0);
+        for (String m : new String[]{"0", "51", "101", "201", "301+"}) {
+            marks.addView(text(7.5f, 0xA6F4F6F5, 400, m), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        }
+        c.addView(marks);
         c.addView(spacer());
         String[] notes = {"Udara bersih.", "Tiada jerebu. Selamat untuk aktiviti luar.", "Kurangkan aktiviti luar.",
                 "Elakkan aktiviti luar. Tutup tingkap.", "Kekal di dalam rumah."};
         TextView note = text(10, WHITE, 400, notes[band]);
         note.setSingleLine(false);
-        note.setMaxLines(3);
+        note.setMaxLines(2);
         c.addView(note);
         String s = hz.station.contains(",") ? hz.station.substring(0, hz.station.indexOf(',')) : hz.station;
         TextView src = text(8, FAINT, 400, "JAS APIMS · " + s);
