@@ -67,7 +67,8 @@ sijil tandatangan (`CN=LayarKaca`) untuk disemak.
 
 ## Kemas kini
 
-**v1.4.1:** paparan Maklumat Penuh kini ada bar warna IPU seperti Klasik.
+**v1.4.1:** paparan Maklumat Penuh kini ada bar warna IPU seperti Klasik. **Tetapan › Kemas kini** kini terus
+menyemak GitHub bila dibuka, tidak lagi menunggu semakan harian.
 
 **v1.4: pilih paparan skrin utama.** Jubin **Lokasi** kini **Tetapan**: Lokasi, Paparan, Pasukan pilihan dan
 Kemas kini. Lima paparan untuk dipilih dengan alat kawalan jauh:

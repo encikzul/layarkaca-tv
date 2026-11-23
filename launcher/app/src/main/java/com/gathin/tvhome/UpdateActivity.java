@@ -82,6 +82,24 @@ public final class UpdateActivity extends Activity {
         panel.addView(later, rowParams());
         setContentView(root);
 
+        // Opened by hand: ask GitHub now, rather than trusting the once-a-day check.
+        title.setText("Kemas kini");
+        status.setText("Menyemak versi terbaru...");
+        go.setVisibility(View.GONE);
+        later.setText("Tutup");
+        later.requestFocus();
+        final android.content.Context app = getApplicationContext();
+        new Thread(() -> {
+            Updates.check(app);
+            handler.post(() -> {
+                if (!isFinishing() && !isDestroyed()) showState();
+            });
+        }, "update-check").start();
+    }
+
+    /** What the last check found: a newer version to install, or this one is current. */
+    private void showState() {
+        if (working) return;
         String v = Updates.newer(this);
         if (v == null) {
             title.setText("LayarKaca terkini");
@@ -94,6 +112,8 @@ public final class UpdateActivity extends Activity {
         title.setText("LayarKaca " + v);
         status.setText("Versi baharu tersedia (sekarang " + Updates.installed(this) + "). Tetapan, lokasi dan susunan "
                 + "aplikasi anda kekal. Skrin utama akan dimulakan semula selepas dipasang.");
+        go.setVisibility(View.VISIBLE);
+        later.setText("Nanti");
         go.requestFocus();
     }
 
