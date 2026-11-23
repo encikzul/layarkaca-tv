@@ -131,6 +131,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private boolean shamsi;
     /** Today's prayer times under the clock (prayer_zone), and whether the azan plays. */
     private TextView prayerLine;
+    /** "Versi baharu LayarKaca 1.2 tersedia" when GitHub has a newer release; see Updates. */
+    private TextView updateLine;
+    private final java.util.concurrent.atomic.AtomicBoolean updateChecking = new java.util.concurrent.atomic.AtomicBoolean();
     private String prayerZone = "";
     private boolean prayerAzan;
     private android.widget.TextClock malayDate;
@@ -324,6 +327,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         shamsiDate = findViewById(R.id.shamsiDate);
         shamsi = cfg.shamsiDate;
         prayerLine = findViewById(R.id.prayerLine);
+        updateLine = findViewById(R.id.updateLine);
         prayerZone = cfg.prayerZone;
         prayerAzan = cfg.azan;
         // First start with no place set anywhere: ask once, with the remote (the Lokasi tile asks again).
@@ -792,6 +796,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         refreshHaze();
         updateWifiLabel();
         updateInputsButton();
+        showUpdateLine();
+        checkForUpdate();
         startWallpaperRotation();
         handler.postDelayed(minuteTick, MINUTE_MS);
         handler.removeCallbacks(cacheClean);
@@ -1924,6 +1930,30 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 updatePrayerCard();
             });
         }, "prayer").start();
+    }
+
+    /** Shows or hides the line under the clock that says a newer LayarKaca is out. */
+    private void showUpdateLine() {
+        String v = Updates.newer(this);
+        int was = updateLine.getVisibility();
+        if (v != null) updateLine.setText("Versi baharu LayarKaca " + v + " tersedia: jalankan pemasang dan pilih 1");
+        updateLine.setVisibility(v != null ? View.VISIBLE : View.GONE);
+        // The cards sit under this block: once it has its new height, move them to match.
+        if (was != updateLine.getVisibility() && heroShown) updateLine.post(() -> layoutInfo(heroShelf.getY()));
+    }
+
+    /** Asks GitHub for the latest release at most once a day; off the main thread. */
+    private void checkForUpdate() {
+        if (!Updates.due(this) || !updateChecking.compareAndSet(false, true)) return;
+        final Context app = getApplicationContext();
+        new Thread(() -> {
+            try {
+                Updates.check(app);
+            } finally {
+                updateChecking.set(false);
+            }
+            handler.post(this::showUpdateLine);
+        }, "update").start();
     }
 
     /** Shows the Wi-Fi network name on the button when we can read it, otherwise the connection type. */

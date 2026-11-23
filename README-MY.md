@@ -353,6 +353,8 @@ Tulis tepat seperti di bawah. Sumber: [APIMS, JAS](https://eqms.doe.gov.my/APIMS
 | Ke | Untuk | Apa yang dihantar |
 |---|---|---|
 | api.waktusolat.app | Waktu solat, sebulan sekali | Kod zon sahaja |
+| e-solat.gov.my | Waktu solat setahun, hanya bila api.waktusolat.app gagal | Kod zon sahaja |
+| api.github.com | Semak versi baharu LayarKaca, sehari sekali | Tiada; hanya permintaan itu |
 | api.data.gov.my | Ramalan (3 jam sekali) dan amaran (20 minit sekali) | Nama daerah sahaja |
 | eqms.doe.gov.my | IPU, 30 minit sekali | Tiada; seluruh senarai stesen dimuat turun |
 | bing.com | Gambar tempat, seminggu sekali | Bahasa TV |
@@ -398,7 +400,8 @@ Setiap keluaran: naikkan `versionCode` dan `versionName` dalam `launcher/app/bui
 
 - [Glass TV](https://github.com/cocombee/glass-tv) oleh cocombee, dibina atas
   [CleanYourTV](https://github.com/Gathin23/cleanyourtv) © 2026 Gathin. Lesen MIT, lihat [LICENSE](LICENSE).
-- Waktu solat: data JAKIM melalui [api.waktusolat.app](https://api.waktusolat.app) (projek komuniti).
+- Waktu solat: data JAKIM melalui [api.waktusolat.app](https://api.waktusolat.app) (projek komuniti), dengan
+  [e-Solat JAKIM](https://www.e-solat.gov.my) sebagai sandaran.
 - Cuaca dan amaran: MET Malaysia melalui [data.gov.my](https://data.gov.my).
 - IPU: Jabatan Alam Sekitar, [APIMS](https://eqms.doe.gov.my/APIMS/main).
 - Fon Outfit: SIL Open Font License.

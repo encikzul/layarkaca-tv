@@ -67,6 +67,16 @@ sijil tandatangan (`CN=LayarKaca`) untuk disemak.
 
 ## Kemas kini
 
+**23 November 2026: v1.2, makluman kemas kini dan waktu solat lebih tahan.**
+
+- Bila ada versi baharu di GitHub, satu baris kuning muncul di bawah jam: *Versi baharu LayarKaca … tersedia*.
+  TV menyemak sekali sehari; tiada apa dihantar selain permintaan itu sendiri.
+- Waktu solat bulan ini dan bulan depan kini disimpan lebih awal. Jika api.waktusolat.app tidak dapat dihubungi,
+  LayarKaca mengambil waktu terus daripada e-Solat JAKIM, jadi kad waktu solat dan bunyi bip tidak hilang.
+
+Untuk mengemas kini, jalankan arahan di atas dan pilih **1**. Ini kali terakhir anda perlu tahu sendiri: versi
+seterusnya akan dimaklumkan di skrin TV.
+
 **7 November 2026: v1.1, waktu solat pada TV dengan zon waktu luar negara.** Sesetengah box yang dibeli dari luar
 negara kekal pada zon waktu lain (contohnya New York): jam TV salah, kad waktu solat tidak muncul dan panel masuk
 waktu tidak keluar. LayarKaca kini menggunakan waktu Malaysia sendiri, dan pemasang cuba membetulkan zon waktu TV.
