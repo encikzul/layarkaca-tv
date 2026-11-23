@@ -255,6 +255,8 @@ json.dump(c, open(sys.argv[2], "w"), indent=2)' themes/malaysia/config.json "$th
   fi
 
   T "appops set $PKG SYSTEM_ALERT_WINDOW allow" >/dev/null && ok "Panel waktu solat dibenarkan"
+  # Jubin Kemas kini memasang versi baharu terus di TV; tanpa ini TV bertanya sekali sahaja.
+  T "appops set $PKG REQUEST_INSTALL_PACKAGES allow" >/dev/null 2>&1 && ok "Kemas kini dari TV dibenarkan"
   fix_timezone
 
   step "Langkah 6: pilih lokasi di TV"

@@ -197,6 +197,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
             parts.add('#' + c.pkg + '/' + c.component.flattenToShortString() + '|' + c.label + '|'
                     + c.caption + '|' + c.accent);
         }
+        String update = Updates.newer(ctx);
+        if (update != null) parts.add("~update " + update);   // the Kemas kini tile comes and goes with it
         Collections.sort(parts);
         String signature = android.text.TextUtils.join(";", parts);
         if (signature.equals(builtFrom) && !items.isEmpty()) return false;
@@ -259,6 +261,11 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
             if (ca != cb) return ca ? -1 : 1;
             return a.label.compareToIgnoreCase(b.label);
         });
+        // A newer LayarKaca is out: its tile goes first, where the remote already is.
+        if (update != null) {
+            fresh.add(0, new Entry("Kemas kini " + update, new ComponentName(ctx, UpdateActivity.class), null,
+                    ctx.getDrawable(R.drawable.ic_update)));
+        }
         // Optional "Default home" tile (config.xml), only when this TV actually has a home-screen picker.
         if (showHomeSettings
                 && pm.resolveActivity(new Intent(Settings.ACTION_HOME_SETTINGS), 0) != null) {

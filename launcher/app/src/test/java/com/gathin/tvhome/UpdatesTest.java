@@ -39,4 +39,30 @@ public class UpdatesTest {
         assertFalse(Updates.isNewer("nightly", "1.1"));
         assertFalse(Updates.isNewer("v1.2", "1.1-debug"));
     }
+
+    @Test
+    public void onlyThisRepositorysReleaseFiles() {
+        String base = "https://github.com/encikzul/layarkaca-tv/releases/download/";
+        assertTrue(Updates.isReleaseFile(base + "v1.3/layarkaca-v1.3.apk"));
+        assertTrue(Updates.isReleaseFile(base + "v1.3/layarkaca-v1.3.apk.sha256"));
+        assertFalse(Updates.isReleaseFile("https://github.com/someone/layarkaca-tv/releases/download/v1.3/x.apk"));
+        assertFalse(Updates.isReleaseFile("http://github.com/encikzul/layarkaca-tv/releases/download/v1.3/x.apk"));
+        assertFalse(Updates.isReleaseFile(base + "v1.3/../../evil/x.apk"));
+        assertFalse(Updates.isReleaseFile(base + "v1.3/sub/x.apk"));
+        assertFalse(Updates.isReleaseFile(base + "latest/x.apk"));
+        assertFalse(Updates.isReleaseFile(""));
+        assertFalse(Updates.isReleaseFile(null));
+    }
+
+    @Test
+    public void readsTheSha256File() {
+        String hash = "3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b";
+        assertEquals(hash, Updates.shaOf(hash + "  layarkaca-v1.3.apk\n"));
+        assertEquals(hash, Updates.shaOf(hash.toUpperCase()));
+        assertEquals(hash, Updates.shaOf(hash + "\n"));
+        assertNull(Updates.shaOf(hash.substring(1) + "  x.apk"));
+        assertNull(Updates.shaOf(hash + "0  x.apk"));
+        assertNull(Updates.shaOf("not a hash"));
+        assertNull(Updates.shaOf(null));
+    }
 }
