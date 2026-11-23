@@ -18,6 +18,10 @@
     <!-- Lets the prayer-time panel open over another app (granted once with appops over adb). -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!-- The Kemas kini tile installs a newer LayarKaca from this project's own Releases (UpdateActivity). Android
+         still asks the user to confirm, and only accepts an APK signed with the same key. The installer grants
+         it with appops; otherwise the TV asks once. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!-- Android 11+ package visibility: lets the launcher list the TV apps it shows as tiles, and the
          apps that declare a module card (docs/specs/card.md). -->
@@ -135,6 +139,18 @@
             android:screenOrientation="landscape" />
         <receiver
             android:name=".AzanReceiver"
+            android:exported="false" />
+        <!-- Kemas kini: download, check and install a newer LayarKaca with the remote. -->
+        <activity
+            android:name=".UpdateActivity"
+            android:exported="false"
+            android:label="Kemas kini"
+            android:theme="@style/Theme.TvHome.Azan"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            android:screenOrientation="landscape" />
+        <receiver
+            android:name=".UpdateReceiver"
             android:exported="false" />
         <service
             android:name=".AzanService"

@@ -280,6 +280,8 @@ function Install-GlassTv {
     }
 
     T "appops set $Pkg SYSTEM_ALERT_WINDOW allow" | Out-Null
+    # Jubin Kemas kini memasang versi baharu terus di TV; tanpa ini TV bertanya sekali sahaja.
+    T "appops set $Pkg REQUEST_INSTALL_PACKAGES allow" 2>$null | Out-Null
     Ok 'Panel waktu solat dibenarkan'
     Fix-Timezone
 

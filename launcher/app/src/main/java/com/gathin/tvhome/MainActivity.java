@@ -1936,7 +1936,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private void showUpdateLine() {
         String v = Updates.newer(this);
         int was = updateLine.getVisibility();
-        if (v != null) updateLine.setText("Versi baharu LayarKaca " + v + " tersedia: jalankan pemasang dan pilih 1");
+        if (v != null) updateLine.setText("Versi baharu LayarKaca " + v + " tersedia: pilih jubin Kemas kini di bawah");
         updateLine.setVisibility(v != null ? View.VISIBLE : View.GONE);
         // The cards sit under this block: once it has its new height, move them to match.
         if (was != updateLine.getVisibility() && heroShown) updateLine.post(() -> layoutInfo(heroShelf.getY()));
@@ -1952,7 +1952,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             } finally {
                 updateChecking.set(false);
             }
-            handler.post(this::showUpdateLine);
+            handler.post(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                showUpdateLine();
+                reloadApps(false);   // adds or removes the Kemas kini tile; does nothing when unchanged
+            });
         }, "update").start();
     }
 

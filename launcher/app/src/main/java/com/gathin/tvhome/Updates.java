@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
@@ -17,7 +18,8 @@ import java.util.regex.Pattern;
 /**
  * Tells the home screen when a newer LayarKaca is on GitHub, so a TV set up once does not stay on an old version
  * without anyone knowing. Once a day it asks GitHub for the latest release's tag; nothing is sent but that request.
- * Installing stays with the installer (pasang.sh / pasang.ps1): the app only shows a line saying an update exists.
+ * The release's APK and its SHA-256 are remembered too, so the Kemas kini tile (UpdateActivity) can install the
+ * update on the TV itself; the installer (pasang.sh / pasang.ps1) still works as before.
  */
 final class Updates {
     private static final String TAG = "TvHome.Update";
@@ -25,6 +27,10 @@ final class Updates {
     private static final String PREFS = "updates";
     private static final String KEY_LATEST = "latest";
     private static final String KEY_CHECKED = "checked";
+    private static final String KEY_APK = "apk_url";
+    private static final String KEY_SHA = "sha_url";
+    /** Release files are only ever downloaded from this repository's own Releases. */
+    static final String DOWNLOADS = "https://github.com/encikzul/layarkaca-tv/releases/download/";
     private static final long DAY_MS = 24 * 60 * 60_000L;
     private static final Pattern VERSION = Pattern.compile("^v?(\\d+(?:\\.\\d+)*)$");
 
@@ -58,10 +64,20 @@ final class Updates {
             try (InputStream in = conn.getInputStream()) {
                 body = readAll(in, 256 * 1024);
             }
-            String tag = new JSONObject(new String(body, StandardCharsets.UTF_8)).optString("tag_name", "");
+            JSONObject release = new JSONObject(new String(body, StandardCharsets.UTF_8));
+            String tag = release.optString("tag_name", "");
             String version = clean(tag);
             if (version == null) throw new Exception("unreadable tag '" + tag + "'");
-            prefs(ctx).edit().putString(KEY_LATEST, version).apply();
+            String apk = null, sha = null;
+            JSONArray assets = release.optJSONArray("assets");
+            for (int i = 0; assets != null && i < assets.length(); i++) {
+                JSONObject a = assets.optJSONObject(i);
+                String url = a != null ? a.optString("browser_download_url", "") : "";
+                if (!isReleaseFile(url)) continue;
+                if (url.endsWith(".apk")) apk = url;
+                else if (url.endsWith(".apk.sha256")) sha = url;
+            }
+            prefs(ctx).edit().putString(KEY_LATEST, version).putString(KEY_APK, apk).putString(KEY_SHA, sha).apply();
             Log.i(TAG, "latest release " + version + ", installed " + installed(ctx));
         } catch (Exception e) {
             Log.w(TAG, "update check failed: " + e);
@@ -74,6 +90,26 @@ final class Updates {
     static String newer(Context ctx) {
         String latest = prefs(ctx).getString(KEY_LATEST, null);
         return isNewer(latest, installed(ctx)) ? latest : null;
+    }
+
+    /** The newer release's APK and SHA-256 file, or null when either is missing. */
+    static String[] files(Context ctx) {
+        SharedPreferences p = prefs(ctx);
+        String apk = p.getString(KEY_APK, null), sha = p.getString(KEY_SHA, null);
+        return isReleaseFile(apk) && isReleaseFile(sha) ? new String[]{apk, sha} : null;
+    }
+
+    /** True for a file on this repository's Releases page over https, and nothing else. */
+    static boolean isReleaseFile(String url) {
+        if (url == null || !url.startsWith(DOWNLOADS)) return false;
+        String rest = url.substring(DOWNLOADS.length());
+        return rest.matches("v?\\d+(\\.\\d+)*/[A-Za-z0-9._-]+") && !rest.contains("..");
+    }
+
+    /** The 64 hex digits at the start of a .sha256 file ("hash  file.apk"), lower case; null otherwise. */
+    static String shaOf(String text) {
+        Matcher m = Pattern.compile("^\\s*([0-9A-Fa-f]{64})(\\s|$)").matcher(text == null ? "" : text);
+        return m.find() ? m.group(1).toLowerCase(java.util.Locale.ROOT) : null;
     }
 
     /** This app's versionName, e.g. "1.1"; "" when Android cannot say. */

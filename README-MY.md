@@ -155,10 +155,11 @@ nano ~/tema-saya/config.json          # ubah prayer_zone, weather_location, weat
 tools/theme.sh ~/tema-saya
 ```
 
-**7. Benarkan panel waktu solat muncul di atas aplikasi lain** (sekali sahaja):
+**7. Benarkan panel waktu solat muncul di atas aplikasi lain, dan kemas kini dari TV** (sekali sahaja):
 
 ```bash
 tools/venv/bin/python -I tools/tv.py 'appops set com.gathin.tvhome SYSTEM_ALERT_WINDOW allow'
+tools/venv/bin/python -I tools/tv.py 'appops set com.gathin.tvhome REQUEST_INSTALL_PACKAGES allow'
 ```
 
 Tanpa langkah ini, anda hanya dapat notis kecil dan bunyi. Untuk cuba panel sekarang:

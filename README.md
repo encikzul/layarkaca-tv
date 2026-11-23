@@ -67,6 +67,15 @@ sijil tandatangan (`CN=LayarKaca`) untuk disemak.
 
 ## Kemas kini
 
+**v1.3: kemas kini terus dari TV.** Bila ada versi baharu, jubin **Kemas kini** muncul di depan senarai aplikasi.
+Pilih dengan alat kawalan jauh, tekan **Kemas kini sekarang**, kemudian **Pasang (Install)** di skrin Android.
+Tiada komputer diperlukan. LayarKaca hanya memasang fail dari halaman Releases projek ini, menyemak SHA-256nya, dan
+Android sendiri menolak fail yang tidak ditandatangani dengan kunci yang sama. Pada sesetengah TV, kali pertama TV
+akan meminta anda membenarkan LayarKaca memasang aplikasi; hidupkan suis itu dan tekan Back. Jika TV anda tidak
+membenarkannya, pemasang dari komputer masih berfungsi seperti biasa.
+
+Untuk mendapat v1.3, jalankan arahan di atas dan pilih **1** (kali terakhir perlu dari komputer).
+
 **23 November 2026: v1.2, makluman kemas kini dan waktu solat lebih tahan.**
 
 - Bila ada versi baharu di GitHub, satu baris kuning muncul di bawah jam: *Versi baharu LayarKaca … tersedia*.
