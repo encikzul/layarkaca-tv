@@ -67,6 +67,18 @@ sijil tandatangan (`CN=LayarKaca`) untuk disemak.
 
 ## Kemas kini
 
+**v1.4: pilih paparan skrin utama.** Jubin **Lokasi** kini **Tetapan**: Lokasi, Paparan, Pasukan pilihan dan
+Kemas kini. Lima paparan untuk dipilih dengan alat kawalan jauh:
+
+- **Klasik**: tiga kad seperti dahulu; cuaca pagi, petang dan malam kini dengan ikon.
+- **Fokus Solat**: waktu solat seterusnya besar di tengah.
+- **Minimal**: jam dan satu baris waktu solat; gambar latar penuh.
+- **Maklumat Penuh**: waktu solat, ramalan cuaca MET 7 hari (bila hujan setiap hari) dan IPU.
+- **Bola Sepak**: skor langsung dan keputusan Liga Super, Piala Malaysia, Piala FA, Piala MFL, EPL, Liga
+  Juara-Juara dan semua perlawanan Harimau Malaya dan Malaysia B-23. Data: API-Football.
+
+Percuma. TV v1.3 boleh kemas kini terus dari jubin **Kemas kini**.
+
 **v1.3: kemas kini terus dari TV.** Bila ada versi baharu, jubin **Kemas kini** muncul di depan senarai aplikasi.
 Pilih dengan alat kawalan jauh, tekan **Kemas kini sekarang**, kemudian **Pasang (Install)** di skrin Android.
 Tiada komputer diperlukan. LayarKaca hanya memasang fail dari halaman Releases projek ini, menyemak SHA-256nya, dan

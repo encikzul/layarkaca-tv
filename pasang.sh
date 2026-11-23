@@ -262,7 +262,7 @@ json.dump(c, open(sys.argv[2], "w"), indent=2)' themes/malaysia/config.json "$th
   step "Langkah 6: pilih lokasi di TV"
   T "am start -n $PKG/.PlaceActivity" >/dev/null
   say "Lihat TV: pilih negeri, kawasan dan stesen udara dengan alat kawalan jauh, tekan OK."
-  say "Untuk menukar lokasi nanti: tekan Bawah di skrin utama dan buka jubin 'Lokasi'."
+  say "Untuk menukar lokasi nanti: tekan Bawah di skrin utama dan buka jubin 'Tetapan', kemudian Lokasi."
   printf '\n%sSiap!%s Tekan Home pada alat kawalan jauh.\n' "$G$B" "$N"
 }
 
