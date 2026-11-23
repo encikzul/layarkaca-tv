@@ -1,0 +1,13 @@
+{
+  "name": "layarkaca-bola",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/bola.test.mjs",
+    "project:create": "wrangler pages project create layarkaca-bola --production-branch main",
+    "deploy": "wrangler pages deploy public --project-name layarkaca-bola --branch main"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}

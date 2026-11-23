@@ -140,6 +140,15 @@
         <receiver
             android:name=".AzanReceiver"
             android:exported="false" />
+        <!-- The Tetapan tile: Lokasi, Paparan (the home screen layout), Pasukan pilihan and Kemas kini. -->
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="Tetapan"
+            android:theme="@style/Theme.TvHome.Azan"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            android:screenOrientation="landscape" />
         <!-- Kemas kini: download, check and install a newer LayarKaca with the remote. -->
         <activity
             android:name=".UpdateActivity"

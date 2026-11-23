@@ -288,7 +288,7 @@ function Install-GlassTv {
     Step 'Langkah 6: pilih lokasi di TV'
     T "am start -n $Pkg/.PlaceActivity" | Out-Null
     Say 'Lihat TV: pilih negeri, kawasan dan stesen udara dengan alat kawalan jauh, tekan OK.'
-    Say "Untuk menukar lokasi nanti: tekan Bawah di skrin utama dan buka jubin 'Lokasi'."
+    Say "Untuk menukar lokasi nanti: tekan Bawah di skrin utama dan buka jubin 'Tetapan', kemudian Lokasi."
     Write-Host ''
     Write-Host 'Siap! Tekan Home pada alat kawalan jauh.' -ForegroundColor Green
 }

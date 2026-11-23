@@ -26,6 +26,18 @@ jobs:
           CLEANYOURTV_STRICT: ${{ github.event_name == 'push' && '1' || '' }}
         run: python3 -m unittest discover -s tests -v
 
+  bola:
+    name: Football server tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: bola/ unit tests
+        working-directory: bola
+        run: node --test test/bola.test.mjs
+
   launcher:
     name: Launcher build and unit tests
     runs-on: ubuntu-latest

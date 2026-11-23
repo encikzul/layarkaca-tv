@@ -101,6 +101,13 @@
             android:includeFontPadding="false"
             android:visibility="gone" />
 
+        <!-- Fokus Solat, Maklumat Penuh and Bola Sepak draw their own panel here instead of the cards (AltPanel). -->
+        <FrameLayout
+            android:id="@+id/altPanel"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:visibility="gone" />
+
         <LinearLayout
             android:id="@+id/cardsRow"
             android:layout_width="match_parent"

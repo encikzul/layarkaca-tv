@@ -155,6 +155,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private android.widget.ImageView wxIcon;
     private String weatherLocation = "", weatherPlace = "";
     private boolean infoOn;
+    /** The home screen layout chosen in Tetapan › Paparan (Display), and the panel B, D and E draw. */
+    private String display = Display.KLASIK;
+    private View altPanelView;
+    private AltPanel alt;
+    private final java.util.concurrent.atomic.AtomicBoolean bolaRefreshing = new java.util.concurrent.atomic.AtomicBoolean();
     private final java.util.concurrent.atomic.AtomicBoolean weatherRefreshing = new java.util.concurrent.atomic.AtomicBoolean();
     private String vpnApp;
     private SpringAnimation springX, springY;
@@ -266,6 +271,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (infoOn && Haze.due(MainActivity.this)) refreshHaze();
             updateWifiLabel();
             refreshPlacesIfDue();
+            refreshBola();
             handler.postDelayed(this, MINUTE_MS);
         }
     };
@@ -381,14 +387,23 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         hzSource = findViewById(R.id.hzSource);
         hzBar = findViewById(R.id.hzBar);
         hazeStation = cfg.hazeStation;
-        infoOn = !weatherLocation.isEmpty() || !hazeStation.isEmpty();
+        display = Display.get(this);
+        boolean ownPanel = Display.ownPanel(display);
+        // Minimal: no cards, the prayer line under the clock. Fokus Solat, Maklumat Penuh, Bola Sepak: their own panel.
+        infoOn = !Display.MINIMAL.equals(display) && (ownPanel || !weatherLocation.isEmpty() || !hazeStation.isEmpty());
         if (infoOn) {
             infoBlock.setVisibility(View.VISIBLE);
             weatherCard.setBackground(new GlassDrawable(weatherCard, 16 * density, density, null, 0.5f));
             prayerCard.setBackground(new GlassDrawable(prayerCard, 16 * density, density, null, 0.5f));
             hazeCard.setBackground(new GlassDrawable(hazeCard, 16 * density, density, null, 0.5f));
-            // The prayer card replaces the line under the clock.
-            if (!prayerZone.isEmpty()) prayerLine.setVisibility(View.GONE);
+            // The prayer card replaces the line under the clock; Bola Sepak keeps the line, it has no prayer card.
+            if (!prayerZone.isEmpty() && !Display.BOLA.equals(display)) prayerLine.setVisibility(View.GONE);
+            altPanelView = findViewById(R.id.altPanel);
+            if (ownPanel) {
+                cardsRow.setVisibility(View.GONE);
+                altPanelView.setVisibility(View.VISIBLE);
+                alt = new AltPanel(this, (android.widget.FrameLayout) altPanelView);
+            }
             stripMet = new android.graphics.drawable.GradientDrawable();
             stripMet.setCornerRadius(16 * density);
             stripMet.setColor(0x2EF2994A);
@@ -794,6 +809,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         updatePrayerCard();
         updateHaze();
         refreshHaze();
+        refreshBola();
         updateWifiLabel();
         updateInputsButton();
         showUpdateLine();
@@ -1622,12 +1638,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         float limit = stripOn && heroBottom > 0 ? heroBottom : shelfTop;
         int h = (int) Math.min(185 * density, limit - top - 8 * density - strip);
         boolean fits = h >= 90 * density;
-        ViewGroup.LayoutParams lp = cardsRow.getLayoutParams();
+        View row = alt != null ? altPanelView : cardsRow;
+        ViewGroup.LayoutParams lp = row.getLayoutParams();
         if (fits && lp.height != h) {
             lp.height = h;
-            cardsRow.setLayoutParams(lp);
+            row.setLayoutParams(lp);
         }
-        cardsRow.setVisibility(fits ? View.VISIBLE : View.GONE);
+        row.setVisibility(fits ? View.VISIBLE : View.GONE);
         infoBlock.animate().alpha(1f).setDuration(reducedMotion ? 100 : 220).start();
     }
 
@@ -1636,6 +1653,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     }
 
     private void updateWeather() {
+        updateAlt();
         if (weatherLocation.isEmpty()) return;
         Weather.Today t = Weather.today(this);
         if (t == null) {
@@ -1651,12 +1669,23 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             wxIcon.setImageResource(weatherIcon(t.summary));
             String when = t.when.isEmpty() || t.when.equalsIgnoreCase("tiada") ? "" : ", " + t.when.toLowerCase(Locale.ROOT);
             wxSummary.setText(t.summary + when);
+            // Morning, afternoon, night: an icon, the name, and a bar (blue rain, amber thunderstorm, grey dry).
             String[] names = {"Pagi", "Petang", "Malam"}, values = {t.morning, t.afternoon, t.night};
             for (int i = 0; i < 3; i++) {
-                android.text.SpannableString p = new android.text.SpannableString(names[i] + "\n" + shortWeather(values[i]));
-                p.setSpan(new android.text.style.ForegroundColorSpan(0xB8F4F6F5), 0, names[i].length(), 0);
-                p.setSpan(new android.text.style.RelativeSizeSpan(0.9f), 0, names[i].length(), 0);
-                wxPeriods[i].setText(p);
+                int kind = Weather.kind(values[i]);
+                android.graphics.drawable.Drawable ic = getDrawable(AltPanel.iconRes(kind, i == 2));
+                int size = Math.round(20 * density);
+                if (ic != null) ic.setBounds(0, 0, size, size);
+                android.graphics.drawable.GradientDrawable bar = new android.graphics.drawable.GradientDrawable();
+                bar.setCornerRadius(2 * density);
+                bar.setColor(AltPanel.barColor(kind));
+                bar.setBounds(0, 0, Math.round(44 * density), Math.round(3 * density));
+                wxPeriods[i].setText(names[i]);
+                wxPeriods[i].setTextColor(0xB8F4F6F5);
+                wxPeriods[i].setGravity(android.view.Gravity.CENTER_HORIZONTAL);
+                wxPeriods[i].setCompoundDrawablePadding(Math.round(4 * density));
+                wxPeriods[i].setCompoundDrawables(null, ic, null, bar);
+                wxPeriods[i].setContentDescription(names[i] + ": " + shortWeather(values[i]));
             }
             wxSource.setText("Ramalan MET Malaysia · " + weatherLocation);
         }
@@ -1679,6 +1708,41 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             warnStrip.setVisibility(View.VISIBLE);
         }
         if (wasShown != (warnStrip.getVisibility() == View.VISIBLE) && heroShown) layoutInfo(heroShelf.getY());
+    }
+
+    /** Redraws the Fokus Solat, Maklumat Penuh or Bola Sepak panel from what is cached. */
+    private void updateAlt() {
+        if (alt == null) return;
+        Weather.Today wx = weatherLocation.isEmpty() ? null : Weather.today(this);
+        Haze.Reading hz = hazeStation.isEmpty() ? null : Haze.reading(this, hazeStation);
+        switch (display) {
+            case Display.FOKUS:
+                alt.showFocus(prayerZone, weatherPlace, wx, hz);
+                break;
+            case Display.MAKLUMAT:
+                alt.showInfo(prayerZone, weatherLocation.isEmpty() ? new java.util.ArrayList<>() : Weather.days(this),
+                        hz, hazeStation);
+                break;
+            case Display.BOLA:
+                alt.showBola(Bola.read(this), Display.team(this), wx, hz);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /** Bola Sepak only: fetches the scores when stale (every 2 minutes during a match); off the main thread. */
+    private void refreshBola() {
+        if (!Display.BOLA.equals(display) || !Bola.due(this) || !bolaRefreshing.compareAndSet(false, true)) return;
+        final Context app = getApplicationContext();
+        new Thread(() -> {
+            try {
+                Bola.refresh(app);
+            } finally {
+                bolaRefreshing.set(false);
+            }
+            handler.post(this::updateAlt);
+        }, "bola").start();
     }
 
     private static int weatherIcon(String summary) {
@@ -1720,6 +1784,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     /** The prayer card: the next prayer large, how long until it, and today's times; in Ramadan, Imsak and berbuka. */
     private void updatePrayerCard() {
+        updateAlt();
         if (!infoOn || prayerZone.isEmpty()) return;
         long now = System.currentTimeMillis();
         java.util.Calendar cal = java.util.Calendar.getInstance();
@@ -1800,6 +1865,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     /** The air quality card, and the yellow strip when the air is unhealthy and no MET warning is up. */
     private void updateHaze() {
+        updateAlt();
         if (!infoOn || hazeStation.isEmpty()) return;
         Haze.Reading r = Haze.reading(this, hazeStation);
         if (r == null) {

@@ -38,6 +38,7 @@ final class Weather {
     private static volatile long lastFailure;
 
     static final class Today {
+        String date = "";
         int min, max;
         String summary = "", when = "", morning = "", afternoon = "", night = "";
     }
@@ -79,6 +80,40 @@ final class Weather {
         }
     }
 
+    /** 0 no rain, 1 rain, 2 thunderstorm, 3 cloudy or unknown: for the icons and the coloured bars. */
+    static int kind(String forecast) {
+        String s = forecast == null ? "" : forecast.toLowerCase(Locale.ROOT);
+        if (s.contains("ribut")) return 2;
+        if (s.contains("tiada hujan") || s.contains("cerah")) return 0;
+        if (s.contains("hujan")) return 1;
+        return 3;
+    }
+
+    /** Today and the days after it that MET has forecast (up to seven), in order; empty when not cached. */
+    static java.util.List<Today> days(Context ctx) {
+        java.util.List<Today> out = new java.util.ArrayList<>();
+        JSONArray days = readArray(new File(ctx.getFilesDir(), FORECAST));
+        if (days == null) return out;
+        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).format(new Date());
+        for (int i = 0; i < days.length(); i++) {
+            JSONObject d = days.optJSONObject(i);
+            if (d == null || d.optString("date").compareTo(today) < 0) continue;
+            Today t = new Today();
+            t.date = d.optString("date");
+            t.min = d.optInt("min_temp", Integer.MIN_VALUE);
+            t.max = d.optInt("max_temp", Integer.MIN_VALUE);
+            if (t.min == Integer.MIN_VALUE || t.max == Integer.MIN_VALUE) continue;
+            t.summary = text(d, "summary_forecast");
+            t.when = text(d, "summary_when");
+            t.morning = text(d, "morning_forecast");
+            t.afternoon = text(d, "afternoon_forecast");
+            t.night = text(d, "night_forecast");
+            out.add(t);
+        }
+        java.util.Collections.sort(out, (a, b) -> a.date.compareTo(b.date));
+        return out.size() > 7 ? out.subList(0, 7) : out;
+    }
+
     /** Today's forecast for the configured place, or null when not cached. */
     static Today today(Context ctx) {
         JSONArray days = readArray(new File(ctx.getFilesDir(), FORECAST));
@@ -88,6 +123,7 @@ final class Weather {
             JSONObject d = days.optJSONObject(i);
             if (d == null || !date.equals(d.optString("date"))) continue;
             Today t = new Today();
+            t.date = date;
             t.min = d.optInt("min_temp", Integer.MIN_VALUE);
             t.max = d.optInt("max_temp", Integer.MIN_VALUE);
             if (t.min == Integer.MIN_VALUE || t.max == Integer.MIN_VALUE) return null;

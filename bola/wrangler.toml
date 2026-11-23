@@ -1,0 +1,13 @@
+# LayarKaca Bola: a Cloudflare Pages project, https://layarkaca-bola.pages.dev/bola.json
+name = "layarkaca-bola"
+pages_build_output_dir = "public"
+compatibility_date = "2026-11-01"
+
+[vars]
+# Seconds between live-score checks while a match is on. 300 fits API-Football's free plan (100 a day);
+# 60 needs the Pro plan.
+LIVE_SECONDS = "300"
+
+[[kv_namespaces]]
+binding = "BOLA"
+id = "9243c796504e4d2db4d10b7cf96689bc"

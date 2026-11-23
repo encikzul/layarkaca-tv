@@ -49,7 +49,7 @@ Selepas memilih **1**, skrip berjalan sendiri sehingga **Siap!**:
 *Pada Windows, tetingkap PowerShell berwarna biru dan tanda ✓ ditulis [OK]; pilihan dan langkahnya sama.*
 
 Arahan yang sama juga menukar lokasi, menguji panel waktu solat dan membatalkan semuanya. Lokasi boleh ditukar
-bila-bila masa melalui jubin **Lokasi** dalam senarai aplikasi. Langkah manual penuh ada di bawah.
+bila-bila masa melalui jubin **Tetapan** › Lokasi dalam senarai aplikasi. Langkah manual penuh ada di bawah.
 
 ## TV yang boleh dan tidak boleh
 
@@ -356,6 +356,7 @@ Tulis tepat seperti di bawah. Sumber: [APIMS, JAS](https://eqms.doe.gov.my/APIMS
 | api.waktusolat.app | Waktu solat, sebulan sekali | Kod zon sahaja |
 | e-solat.gov.my | Waktu solat setahun, hanya bila api.waktusolat.app gagal | Kod zon sahaja |
 | api.github.com | Semak versi baharu LayarKaca, sehari sekali | Tiada; hanya permintaan itu |
+| layarkaca-bola.pages.dev | Keputusan bola sepak, hanya bila paparan Bola Sepak dipilih (2 minit sekali semasa perlawanan, 30 minit sekali selainnya) | Tiada; hanya permintaan itu |
 | api.data.gov.my | Ramalan (3 jam sekali) dan amaran (20 minit sekali) | Nama daerah sahaja |
 | eqms.doe.gov.my | IPU, 30 minit sekali | Tiada; seluruh senarai stesen dimuat turun |
 | bing.com | Gambar tempat, seminggu sekali | Bahasa TV |
