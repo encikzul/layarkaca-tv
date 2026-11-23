@@ -102,15 +102,15 @@ test("refresh with a fake API-Football: spread over minutes, then quiet, then li
     return [];
   };
   const env = { API_FOOTBALL_KEY: "k", LIVE_SECONDS: "300" };
-  // First request: 8 at most (the free plan allows 10 a minute).
+  // First request: 4 at most (the free plan allows 10 a minute; KV can lag, so stay well under).
   let r = await refresh({}, T, env, get);
-  assert.equal(calls.length, 8);
+  assert.equal(calls.length, 4);
   assert.equal(r.state.error, undefined);
   // Another TV asks 20 seconds later: same minute, nothing more.
   r = await refresh(r.state, T + 20_000, env, get);
-  assert.equal(calls.length, 8);
-  // A minute later the rest goes out: 16 in all, none twice.
-  r = await refresh(r.state, T + 61_000, env, get);
+  assert.equal(calls.length, 4);
+  // A minute at a time, the rest goes out: 16 in all, none twice.
+  for (let i = 1; i <= 3; i++) r = await refresh(r.state, T + i * 61_000, env, get);
   assert.equal(calls.length, 16);
   assert.equal(new Set(calls).size, 16);
   assert.ok(calls.includes("/fixtures?league=39&season=2026&from=2026-11-22&to=2026-11-26&timezone=Asia/Kuala_Lumpur"));
@@ -137,4 +137,22 @@ test("the feed shows API-Football's last error, without the key", () => {
   const f = feed({ matches: {}, error: "API-Football: {\"plan\":\"no access\"}", errorAt: T }, T);
   assert.match(f.error, /no access/);
   assert.equal(feed({ matches: {} }, T).error, undefined);
+});
+
+test("API-Football's per-minute limit pauses for a minute, not ten, and is not shown as an error", async () => {
+  let n = 0;
+  const get = async () => {
+    n++;
+    if (n === 3) { const e = new Error("API-Football: rateLimit"); e.rateLimit = true; throw e; }
+    return [{ seasons: [{ year: 2026, current: true }] }];
+  };
+  const env = { API_FOOTBALL_KEY: "k" };
+  let r = await refresh({}, T, env, get);
+  assert.equal(n, 3);
+  assert.equal(r.state.error, undefined);
+  assert.equal(Object.keys(r.state.seasons).length, 2);   // the two before the limit are kept
+  r = await refresh(r.state, T + 30_000, env, get);
+  assert.equal(n, 3);                                     // same minute: waits
+  r = await refresh(r.state, T + 61_000, env, get);
+  assert.ok(n > 3);                                       // next minute: carries on
 });

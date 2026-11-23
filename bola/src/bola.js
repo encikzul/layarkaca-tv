@@ -110,7 +110,11 @@ async function api(key, path) {
   if (!r.ok) throw new Error("API-Football HTTP " + r.status);
   const d = await r.json();
   const errors = d.errors && (Array.isArray(d.errors) ? d.errors.length : Object.keys(d.errors).length);
-  if (errors) throw new Error("API-Football: " + JSON.stringify(d.errors).slice(0, 200));
+  if (errors) {
+    const e = new Error("API-Football: " + JSON.stringify(d.errors).slice(0, 200));
+    e.rateLimit = !Array.isArray(d.errors) && "rateLimit" in d.errors;
+    throw e;
+  }
   return d.response || [];
 }
 
@@ -124,7 +128,7 @@ const STOP = Symbol("per-minute budget used");
 export async function refresh(state, now, env, get = api) {
   const key = env.API_FOOTBALL_KEY;
   const liveSeconds = Number(env.LIVE_SECONDS) || 300;
-  const perMinute = Number(env.PER_MINUTE) || 8;
+  const perMinute = Number(env.PER_MINUTE) || 4;
   const s = { seasons: {}, matches: {}, ...state };
   const todo = plan(s, now, liveSeconds);
   let changed = false;
@@ -174,7 +178,11 @@ export async function refresh(state, now, env, get = api) {
     delete s.error;
     delete s.errorAt;
   } catch (e) {
-    if (e !== STOP) {
+    if (e?.rateLimit) {
+      // API-Football's per-minute limit: not a failure. Stop for this minute and carry on with the next request.
+      win.at = now;
+      win.calls = perMinute;
+    } else if (e !== STOP) {
       s.error = String(e.message || e).slice(0, 200);
       s.errorAt = now;
       changed = true;
